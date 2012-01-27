@@ -1,0 +1,146 @@
+<?php
+
+/**
+  * Implements hook_menu()
+  */
+function bird_taxonomies_menu() {
+  $items = array();
+  $items['bird_taxonomies/ajax/species/%'] = array(
+    'page callback' => 'bird_taxonomies_get_species_ajax_callback',
+    'page arguments' => array(3),
+    'access arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+  $items['bird_taxonomies/ajax/subspecies/%'] = array(
+    'page callback' => 'bird_taxonomies_get_subspecies_ajax_callback',
+    'page arguments' => array(3),
+    'access arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+  * Implements hook_taxonomies_block_info()
+  */
+function bird_taxonomies_block_info() {
+  $blocks['bird_orders'] = array(
+    'info' => t('Bird Orders'), 
+  );
+
+  return $blocks;
+}
+
+/**
+  * Implements hook_taxonomies_block_view()
+  */
+function bird_taxonomies_block_view($delta = '') {
+  // This example is adapted from node.module.
+  $block = array();
+
+  switch ($delta) {
+    case 'bird_orders':
+      $block['subject'] = t('Bird Orders');
+      $block['content'] = array(
+        '#orders' => bird_taxonomies_bird_orders(), 
+        '#theme' => 'bird_taxonomies_bird_orders',
+      );
+      break;
+  }
+  return $block;
+}
+
+/**
+  * Implements hook_theme()
+  */
+function bird_taxonomies_theme($existing, $type, $theme, $path) {
+  return array(
+    'bird_taxonomies_bird_orders' => array(
+      'variables' => array('orders' => NULL,
+    ), 
+  ));
+}
+
+function bird_taxonomies_bird_orders() {
+  
+  $result = db_query("SELECT node.title AS node_title, node.nid AS nid
+                      FROM 
+                      {node} node
+                      WHERE (( (node.status = '1') AND (node.type IN  ('order')) ))
+                      ORDER BY node_title ASC");
+  
+  $orders = array();
+  
+  $families = bird_taxonomies_get_families();
+  
+  foreach ($result as $record) {
+    // Do something with each $record    
+    if(count($families[$record->nid] > 0)) {
+      $orders[] = array( 'data' => l($record->node_title,'node/'.$record->nid),
+                         'children' => $families[$record->nid],
+                        );
+    }
+  }
+    
+  return $orders;
+}
+
+function bird_taxonomies_get_families($order = NULL) {
+
+  $result = db_query("SELECT node.title AS node_title, node.nid AS nid, node_field_data_field_fam_order.nid AS node_field_data_field_fam_order_nid, node.created AS node_created, 'node' AS field_data_field_fam_order_ibc_node_entity_type
+FROM 
+{node} node
+LEFT JOIN {field_data_field_fam_order} field_data_field_fam_order ON node.nid = field_data_field_fam_order.entity_id AND (field_data_field_fam_order.entity_type = 'node' AND field_data_field_fam_order.deleted = '0')
+LEFT JOIN {node} node_field_data_field_fam_order ON field_data_field_fam_order.field_fam_order_nid = node_field_data_field_fam_order.nid
+WHERE (( (node.status = '1') AND (node.type IN  ('family')) ))
+ORDER BY node_title DESC");
+  
+  $families = array();
+  
+  foreach ($result as $record) {
+    // Do something with each $record
+    //dsm($record);
+    $families[$record->node_field_data_field_fam_order_nid ][$record->nid] = array( 'data' => l($record->node_title,'node/'.$record->nid),
+      'class' => array('families'));
+  }
+    
+  return $families;
+}
+
+function bird_taxonomies_get_species_ajax_callback($family = NULL) {
+
+  $result = db_query("SELECT node.title AS node_title, node.nid AS nid
+FROM 
+{node} node
+LEFT JOIN {field_data_field_sp_family_nr} field_data_field_sp_family_nr ON node.nid = field_data_field_sp_family_nr.entity_id AND (field_data_field_sp_family_nr.entity_type = 'node' AND field_data_field_sp_family_nr.deleted = '0')
+LEFT JOIN {node} node_field_data_field_sp_family_nr ON field_data_field_sp_family_nr.field_sp_family_nr_nid = node_field_data_field_sp_family_nr.nid
+WHERE (( (node.status = '1') AND (node.type IN  ('species')) AND (node_field_data_field_sp_family_nr.nid = '52209' ) ))
+ORDER BY node_title DESC");
+  
+  $species = array();
+  
+  foreach ($result as $record) {
+    // Do something with each $record
+    //dsm($record);
+    /*$species[$record->node_field_data_field_fam_order_nid ][$record->nid] = array( 'data' => l($record->node_title,'node/'.$record->nid),
+      'class' => array('families'));
+      */
+      $species[] = $record;
+  }
+    
+  dsm($species);
+  
+  return '';//$species;
+}
+
+function theme_bird_taxonomies_bird_orders($variables) {
+  $orders = $variables['orders'];
+    
+  $output = theme('item_list', array('items' => $orders, 'attributes' => array ('class' => 'orders')));
+    
+  return $output;  
+}
+
+
+
+?>
