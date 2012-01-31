@@ -1,3 +1,26 @@
-ul.orders li.families {
+ul.orders > li > .item-list > ul {
   display: none;
+  margin-top: 5px;
+}
+
+#block-bird-taxonomies-bird-orders h2 {
+  cursor: hand;
+  cursor: pointer;
+}
+
+#block-bird-taxonomies-bird-orders .content {
+  display: none;
+}
+
+#block-bird-taxonomies-bird-orders h2 span.plus {
+  color: black;
+  float: right;
+  font-size: 25px;
+  position: relative;
+  top: -3px;
+}
+
+#block-bird-taxonomies-bird-orders .content ul li span.plus {
+  color: black;
+  float: right;
 }
