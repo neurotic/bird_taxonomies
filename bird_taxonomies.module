@@ -8,13 +8,13 @@ function bird_taxonomies_menu() {
   $items['bird_taxonomies/ajax/species/%'] = array(
     'page callback' => 'bird_taxonomies_get_species_ajax_callback',
     'page arguments' => array(3),
-    'access arguments' => array(1),
+    'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
   $items['bird_taxonomies/ajax/subspecies/%'] = array(
     'page callback' => 'bird_taxonomies_get_subspecies_ajax_callback',
     'page arguments' => array(3),
-    'access arguments' => array(1),
+    'access arguments' => array('access content'),    
     'type' => MENU_CALLBACK,
   );
   return $items;
@@ -57,8 +57,14 @@ function bird_taxonomies_theme($existing, $type, $theme, $path) {
   return array(
     'bird_taxonomies_bird_orders' => array(
       'variables' => array('orders' => NULL,
-    ), 
-  ));
+    )), 
+    'bird_taxonomies_bird_species' => array(
+      'variables' => array('species' => NULL,
+    )), 
+    'bird_taxonomies_bird_subspecies' => array(
+      'variables' => array('subspecies' => NULL,
+    )), 
+  );
 }
 
 function bird_taxonomies_bird_orders() {
@@ -76,9 +82,8 @@ function bird_taxonomies_bird_orders() {
   foreach ($result as $record) {
     // Do something with each $record    
     if(count($families[$record->nid] > 0)) {
-      $orders[] = array( 'data' => l($record->node_title,'node/'.$record->nid),
-                         'children' => $families[$record->nid],
-                        );
+      $orders[] = array( 'data' => '<span class="a-wrapper clearfix">'.l($record->node_title,'node/'.$record->nid).'<span class="go"><span>-></span></span></span>' . theme('item_list', array('items' => $families[$record->nid], 'attributes' => array ('class' => 'families'))),
+      'class' => array('class' => (arg(1) == $record->nid) ? 'active selected' : ''));
     }
   }
     
@@ -100,25 +105,21 @@ ORDER BY node_title DESC");
   foreach ($result as $record) {
     // Do something with each $record
     //dsm($record);
-    $families[$record->node_field_data_field_fam_order_nid ][$record->nid] = array( 'data' => l($record->node_title,'node/'.$record->nid),
-      'class' => array('families'));
+    $families[$record->node_field_data_field_fam_order_nid][$record->nid] = array( 'data' => '<span class="a-wrapper clearfix">'.l($record->node_title,'node/'.$record->nid) . '<span class="go"><span>-></span></span></span>', 'id' => 'id-' . $record->nid);
   }
-    
+      
   return $families;
 }
 
-function bird_taxonomies_get_species_ajax_callback($family = NULL) {
-
+function bird_taxonomies_get_species_ajax_callback($family = NULL) {  
   $result = db_query("SELECT node.title AS node_title, node.nid AS nid
 FROM 
 {node} node
 LEFT JOIN {field_data_field_sp_family_nr} field_data_field_sp_family_nr ON node.nid = field_data_field_sp_family_nr.entity_id AND (field_data_field_sp_family_nr.entity_type = 'node' AND field_data_field_sp_family_nr.deleted = '0')
 LEFT JOIN {node} node_field_data_field_sp_family_nr ON field_data_field_sp_family_nr.field_sp_family_nr_nid = node_field_data_field_sp_family_nr.nid
-WHERE (( (node.status = '1') AND (node.type IN  ('species')) AND (node_field_data_field_sp_family_nr.nid = '52209' ) ))
-ORDER BY node_title DESC");
-  
-  $species = array();
-  
+WHERE (( (node.status = '1') AND (node.type IN  ('species')) AND (node_field_data_field_sp_family_nr.nid = :family ) ))
+ORDER BY node_title DESC",array(':family' => $family));
+        
   foreach ($result as $record) {
     // Do something with each $record
     //dsm($record);
@@ -127,10 +128,37 @@ ORDER BY node_title DESC");
       */
       $species[] = $record;
   }
+      
+  print theme('bird_taxonomies_bird_species',array('species' => $species));
+  exit();
+}
+
+function bird_taxonomies_get_subspecies_ajax_callback($specie = NULL) {
+
+  $result = db_query("SELECT node.title AS node_title, node.nid AS nid, node.created AS node_created
+FROM 
+{node} node
+LEFT JOIN {field_data_field_ssp_species} field_data_field_ssp_species ON node.nid = field_data_field_ssp_species.entity_id AND (field_data_field_ssp_species.entity_type = 'node' AND field_data_field_ssp_species.deleted = '0')
+LEFT JOIN {node} node_field_data_field_ssp_species ON field_data_field_ssp_species.field_ssp_species_nid = node_field_data_field_ssp_species.nid
+WHERE (( (node.status = '1') AND (node.type IN  ('subspecies')) AND (node_field_data_field_ssp_species.nid = :specie) ))
+ORDER BY node_title DESC",array(':specie' => $specie));
     
-  dsm($species);
+  foreach ($result as $record) {
+    // Do something with each $record
+    //dsm($record);
+    /*$species[$record->node_field_data_field_fam_order_nid ][$record->nid] = array( 'data' => l($record->node_title,'node/'.$record->nid),
+      'class' => array('families'));
+      */
+      $subspecies[] = $record;
+  }
+          
+  print theme('bird_taxonomies_bird_subspecies',array('subspecies' => $subspecies));
+  exit();
+}
+
+/** Abre o cierra el menu segun donde estemos **/
+function bird_taxonomies_menu_state() {
   
-  return '';//$species;
 }
 
 function theme_bird_taxonomies_bird_orders($variables) {
@@ -141,6 +169,26 @@ function theme_bird_taxonomies_bird_orders($variables) {
   return $output;  
 }
 
+function theme_bird_taxonomies_bird_species($variables) {
+  $species = $variables['species'];
 
+  foreach($species as $specie) {
+    $items[] = array( 'data' => '<span class="a-wrapper clearfix">'.l($specie->node_title,'node/'.$specie->nid).'<span class="go"><span>-></span></span></span>', 'id' => 'id-' . $specie->nid);
+  }
+    
+  $output = theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'species')));
+    
+  return $output;  
+}
 
-?>
+function theme_bird_taxonomies_bird_subspecies($variables) {
+  $subspecies = $variables['subspecies'];
+    
+  foreach($subspecies as $subspecie) {
+    $items[] = '<span class="a-wrapper clearfix">'.l($subspecie->node_title,'node/'.$subspecie->nid).'<span class="go"><span>-></span></span></span>';
+  }
+    
+  $output = theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'subspecies')));
+    
+  return $output;  
+}
