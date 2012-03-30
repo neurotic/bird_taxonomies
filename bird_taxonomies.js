@@ -81,11 +81,11 @@
     	
     	$('#block-bird-taxonomies-bird-orders h2').click(function() {
 		    $(this).parent().children('.content').slideToggle('slow', function() {
-		      if($(this).parent().children('h2').children('span').text() == '+') {
-		        $(this).parent().children('h2').children('span').text('-');
+		      if($(this).parent().children('h2').children('span.plus').text() == '+') {
+		        $(this).parent().children('h2').children('span.plus').text('-');
 		      }
 		      else {
-		        $(this).parent().children('h2').children('span').text('+');
+		        $(this).parent().children('h2').children('span.plus').text('+');
 		      }
 		    });
 		    return false;

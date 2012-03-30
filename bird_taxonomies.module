@@ -27,7 +27,7 @@ function bird_taxonomies_block_info() {
   $blocks['bird_orders'] = array(
     'info' => t('Bird Orders'), 
   );
-
+  
   return $blocks;
 }
 
@@ -37,7 +37,7 @@ function bird_taxonomies_block_info() {
 function bird_taxonomies_block_view($delta = '') {
   // This example is adapted from node.module.
   $block = array();
-
+    
   switch ($delta) {
     case 'bird_orders':
       $block['subject'] = t('Bird Orders');
@@ -86,7 +86,7 @@ function bird_taxonomies_bird_orders() {
       'class' => array('class' => (arg(1) == $record->nid) ? 'active selected' : ''));
     }
   }
-    
+        
   return $orders;
 }
 
