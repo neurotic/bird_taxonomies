@@ -24,7 +24,7 @@
     	   family = $(this);
    	     $(family).parent().parent('li').toggleClass('selected');
     	   family_id = $(family).parent().parent('li').attr('id');
-    	   family_id = family_id.substring(3,family_id.lenght);
+    	   family_id = family_id.substring(3,family_id.length);
          // Miramos si ya esta puesto y sino lo obteneos
          if($(family).parent().parent().children('.container').length == 0) {
           jQuery.ajax({
@@ -50,7 +50,7 @@
     	   specie = $(this);
     	   $(specie).parent().parent('li').toggleClass('selected');
     	   specie_id = $(specie).parent().parent('li').attr('id');
-    	   specie_id = specie_id.substring(3,specie_id.lenght);
+    	   specie_id = specie_id.substring(3,specie_id.length);
   	     
         //alert(Drupal.settings.basePath + 'bird_taxonomies/ajax/subspecies/' + specie_id);
         // Miramos si ya esta puesto y sino lo obteneos
