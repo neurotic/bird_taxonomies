@@ -239,9 +239,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
     
     if(!empty($country_filter)) {     
       //$view->header[]
-    
-      dsm($view->header['area']);
-      
+          
       $result = db_query($country_filter);
             
       $nids = array();
