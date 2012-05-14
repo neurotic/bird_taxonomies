@@ -71,9 +71,9 @@ function bird_taxonomies_bird_orders() {
   
   $result = db_query("SELECT node.title AS node_title, node.nid AS nid
                       FROM 
-                      {node} node
-                      WHERE (( (node.status = '1') AND (node.type IN  ('order')) ))
-                      ORDER BY node_title ASC");
+                      node node, field_data_field_ord_ordenacion ord
+                      WHERE (( (node.status = '1') AND (node.nid = ord.entity_id) AND (node.type IN  ('order')) ))
+                      ORDER BY ord.field_ord_ordenacion_value ASC");
   
   $orders = array();
   
@@ -97,8 +97,9 @@ FROM
 {node} node
 LEFT JOIN {field_data_field_fam_order} field_data_field_fam_order ON node.nid = field_data_field_fam_order.entity_id AND (field_data_field_fam_order.entity_type = 'node' AND field_data_field_fam_order.deleted = '0')
 LEFT JOIN {node} node_field_data_field_fam_order ON field_data_field_fam_order.field_fam_order_nid = node_field_data_field_fam_order.nid
+LEFT JOIN {field_data_field_fam_ordenacio} field_data_field_fam_ordenacio ON node.nid = field_data_field_fam_ordenacio.entity_id
 WHERE (( (node.status = '1') AND (node.type IN  ('family')) ))
-ORDER BY node_title DESC");
+ORDER BY field_data_field_fam_ordenacio.field_fam_ordenacio_value ASC");
   
   $families = array();
   
@@ -112,13 +113,23 @@ ORDER BY node_title DESC");
 }
 
 function bird_taxonomies_get_species_ajax_callback($family = NULL) {  
-  $result = db_query("SELECT node.title AS node_title, node.nid AS nid
+      
+  $query = "SELECT node.title AS node_title, node.nid AS nid
 FROM 
 {node} node
 LEFT JOIN {field_data_field_sp_family_nr} field_data_field_sp_family_nr ON node.nid = field_data_field_sp_family_nr.entity_id AND (field_data_field_sp_family_nr.entity_type = 'node' AND field_data_field_sp_family_nr.deleted = '0')
 LEFT JOIN {node} node_field_data_field_sp_family_nr ON field_data_field_sp_family_nr.field_sp_family_nr_nid = node_field_data_field_sp_family_nr.nid
-WHERE (( (node.status = '1') AND (node.type IN  ('species')) AND (node_field_data_field_sp_family_nr.nid = :family ) ))
-ORDER BY node_title DESC",array(':family' => $family));
+WHERE (( (node.status = '1') AND (node.type IN  ('species')) AND (node_field_data_field_sp_family_nr.nid = :family ) ))";
+
+  if($countries_filter = get_global_filter_countries()) {
+    $query .= " AND node.nid IN ($countries_filter)";
+  }
+
+  $query .= " ORDER BY node_title DESC";
+  
+  dsm(sprintf($query,array(':family' => $family)));
+  
+  $result = db_query($query,array(':family' => $family));
         
   foreach ($result as $record) {
     // Do something with each $record
@@ -172,8 +183,14 @@ function theme_bird_taxonomies_bird_orders($variables) {
 function theme_bird_taxonomies_bird_species($variables) {
   $species = $variables['species'];
 
-  foreach($species as $specie) {
-    $items[] = array( 'data' => '<span class="a-wrapper clearfix">'.l($specie->node_title,'node/'.$specie->nid).'<span class="go"><span>-></span></span></span>', 'id' => 'id-' . $specie->nid);
+  if(!empty($species)) {
+    foreach($species as $specie) {
+      $items[] = array( 'data' => '<span class="a-wrapper clearfix">'.l(_hba_cursive($specie->node_title),'node/'.$specie->nid,array('html' => true)).'<span class="go"><span>-></span></span></span>', 'id' => 'id-' . $specie->nid);
+    }
+  }
+  else {
+    $items[] = array( 'data' => '<span class="a-wrapper clearfix">'. t('No species with the filter') . '</span>');
+
   }
     
   $output = theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'species')));
@@ -191,4 +208,56 @@ function theme_bird_taxonomies_bird_subspecies($variables) {
   $output = theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'subspecies')));
     
   return $output;  
+}
+
+function get_global_filter_countries() {
+    $countries = array();
+    $country_filter = '';
+    
+    if(!empty($_SESSION['global_filter']['view_taxo_paisos'])) {
+      $country_filter = "SELECT bd.nid_hbw FROM bird_countries as bd WHERE ";
+      
+      $country_filter .= 'bd.tid = ' . implode(' OR bd.tid = ', $_SESSION['global_filter']['view_taxo_paisos']);
+
+    }
+    else {
+      $country_filter = false;
+    }
+    
+    //dsm($country_filter);
+    
+    return $country_filter;
+}
+
+function bird_taxonomies_views_query_alter(&$view, &$query) {
+  // (Example assuming a view with an exposed filter on node title.)
+  // If the input for the title filter is a positive integer, filter against
+  // node ID instead of node title.
+  if ($view->name == 'species_table_by_family') {
+    // Miramos si se ha de filtrar por paises
+    $country_filter = get_global_filter_countries();
+    
+    if(!empty($country_filter)) {     
+      //$view->header[]
+    
+      dsm($view->header['area']);
+      
+      $result = db_query($country_filter);
+            
+      $nids = array();
+      foreach ($result as $record) {
+          $nids[] = $record->nid_hbw;
+      }
+           
+      $view->query->where[] = 
+            array( 'type' => 'AND',
+                   'conditions' => array( 0 => array( 'field'    => 'node.nid',
+                                                      'operator' => 'in',
+                                                      'value'    => $nids, 
+                                                    ),
+                                        ),
+                   'args' => array(),
+                 );
+    }
+  }
 }
