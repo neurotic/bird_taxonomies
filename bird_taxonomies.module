@@ -126,9 +126,7 @@ WHERE (( (node.status = '1') AND (node.type IN  ('species')) AND (node_field_dat
   }
 
   $query .= " ORDER BY node_title DESC";
-  
-  dsm(sprintf($query,array(':family' => $family)));
-  
+    
   $result = db_query($query,array(':family' => $family));
         
   foreach ($result as $record) {
