@@ -293,14 +293,27 @@ function get_global_filter_countries_select() {
 function get_global_filter_countries() {
     $country_filter = '';
 
-    if(!empty($_SESSION['global_filter']['view_taxo_paisos'])) {      
-      $country_filter .= implode(',', $_SESSION['global_filter']['view_taxo_paisos']);
-
+    if(!empty($_SESSION['global_filter']['view_taxo_paisos'])) {    
+      foreach($_SESSION['global_filter']['view_taxo_paisos'] as $country) {
+        $continents = bird_taxonomies_continents();
+        
+        if(isset($continents[$country])) {
+          $country_filter .= implode(', ',$continents[$country]['countries']) . ', ';
+        }
+        else {
+          $country_filter .= $country . ', ';
+        }
+      }  
+      // Si el ultimo elemento tiene una coma se la quitamos
+      $country_filter= trim($country_filter);
+      if(substr($country_filter, strlen($country_filter)-1,1) == ',') {
+        $country_filter = substr($country_filter, 0, strlen($country_filter)-1);
+      }
     }
     else {
       $country_filter = false;
     }
-    
+        
     return $country_filter;
 }
 
@@ -333,4 +346,38 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
                  );
     }
   }
+}
+
+
+function bird_taxonomies_form_global_filter_1_alter(&$form, &$form_state, $form_id) {
+  $tabla_continents = bird_taxonomies_continents();
+
+  $continentes = array();
+  foreach($tabla_continents as $key => $continent) {
+    $continentes[$key] = $continent['name'];
+  }; 
+  
+  //dsm($continentes);
+  
+  $form['view_taxo_paisos']['#options'] = $continentes + $form['view_taxo_paisos']['#options'];
+  //dsm($form['view_taxo_paisos']['#options']);
+  
+  //array_unshift(, $form['view_taxo_paisos']['#options']);
+
+}
+
+function bird_taxonomies_continent_to_country($continent) {
+  $tabla_continents = bird_taxonomies_continents();
+}
+
+function bird_taxonomies_continents() {
+  $tabla_continents = array( '1' => array('name'       => t('Europe'),
+                                           'countries' => array(4326, 4310, 4345, 4323)),
+                             '2' => array('name'       => t('Africa'),
+                                           'countries' => array(4326, 4310, 4345, 4323)),
+                             '3' => array('name'       => t('America'),
+                                           'countries' => array(4326, 4310, 4345, 4323)),
+                            
+                           );
+  return $tabla_continents;
 }
