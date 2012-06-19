@@ -133,7 +133,7 @@ function bird_taxonomies_get_species_ajax_callback($family = NULL) {
 
 function bird_taxonomies_get_species($family = NULL) {  
       
-    $query = "SELECT node.title AS node_title, node.nid AS nid
+    $query = "SELECT distinct(node.title) AS node_title, node.nid AS nid
 FROM 
 {node} node
 LEFT JOIN {field_data_field_sp_family_nr} field_data_field_sp_family_nr ON node.nid = field_data_field_sp_family_nr.entity_id AND (field_data_field_sp_family_nr.entity_type = 'node' AND field_data_field_sp_family_nr.deleted = '0')
@@ -380,4 +380,15 @@ function bird_taxonomies_continents() {
                             
                            );
   return $tabla_continents;
+}
+
+function bird_taxonomies_form_alter(&$form, &$form_state, $form_id) {
+  if($form_id == 'views_exposed_form') {
+    $form['style'] = array( '#type'    => 'select',
+                             '#options' => array('plate_10' => 'plate_10', 
+                                                 'plate_20' => 'plate_20', 
+                                                 'plate_30' => 'plate_30', 
+                                                 'plate_40' => 'plate_40'),
+                           );
+  }
 }
