@@ -384,11 +384,17 @@ function bird_taxonomies_continents() {
 
 function bird_taxonomies_form_alter(&$form, &$form_state, $form_id) {
   if($form_id == 'views_exposed_form') {
-    $form['style'] = array( '#type'    => 'select',
-                             '#options' => array('plate_10' => 'plate_10', 
-                                                 'plate_20' => 'plate_20', 
-                                                 'plate_30' => 'plate_30', 
-                                                 'plate_40' => 'plate_40'),
-                           );
+    /*$form['style'] = array( '#type'    => 'select',
+                             '#options' => bird_taxonomies_plates_styles(),
+                           );*/
+    //dsm($form);
   }
+}
+
+function bird_taxonomies_plates_styles() {
+ return array( 'plate_10' => t('Small'), 
+               'plate_20' => t('Medium'), 
+               'plate_30' => t('Large'), 
+               'plate_40' => t('Extra Large'),
+             );
 }
