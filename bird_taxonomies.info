@@ -2,6 +2,4 @@ name = "Bird Taxonomies"
 description = "Listados de las taxonomias de los pajaros"
 core = "7.x"
 
-stylesheets[all][] = bird_taxonomies.css
-
 scripts[] = bird_taxonomies.js

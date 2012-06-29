@@ -1,15 +1,13 @@
-(function ($) {
-
-  Drupal.behaviors.bird_taxonomies = {
-    attach: function (context, settings) {
+jQuery(document).ready(function($) {
       
-      if($('#block-bird-taxonomies-bird-orders .content').is(':visible')) {
-        $('#block-bird-taxonomies-bird-orders h2').append('<span class="plus">-</span>');
-      }
-      else {
-        $('#block-bird-taxonomies-bird-orders h2').append('<span class="plus">+</span>');
-      }
-    	
+      if($('#block-bird-taxonomies-bird-orders h2 span.plus').length == 0) {
+        if($('#block-bird-taxonomies-bird-orders .content').is(':visible')) {
+          $('#block-bird-taxonomies-bird-orders h2').append('<span class="plus">-</span>');
+        }
+        else {
+          $('#block-bird-taxonomies-bird-orders h2').append('<span class="plus">+</span>');
+        }
+    	}
     	/*$('#block-bird-taxonomies-bird-orders .content ul li a').append('<span class="plus">+</span>');*/
     	
       $('.orders > li > .a-wrapper > a').click(function() {
@@ -91,35 +89,4 @@
 		    return false;
     	});
 
-    }
-  };
-
-}(jQuery));
-
-/*
-$('.orders > li > a > span.plus').click(function() {
-        plus = $(this);
-		    $(this).parent('a').next('.item-list').children('ul').toggle('slow', function() {
-		      if($(plus).text() == '+') {
-		        $(plus).text('-');
-		      }
-		      else {
-		        $(plus).text('+');
-		      }
-		    });
-		    return false;
-    	});
-    	
-    	$('#block-bird-taxonomies-bird-orders h2').click(function() {
-		    $(this).parent().children('.content').toggle('slow', function() {
-		      if($(this).parent().children('h2').children('span').text() == '+') {
-		        $(this).parent().children('h2').children('span').text('-');
-		      }
-		      else {
-		        $(this).parent().children('h2').children('span').text('+');
-		      }
-		    });
-		    return false;
-    	});
-    	
-*/
+});
