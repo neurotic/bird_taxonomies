@@ -276,7 +276,7 @@ function get_global_filter_countries_select() {
     $country_filter = '';
     
     if(!empty($_SESSION['global_filter']['view_taxo_paisos'])) {
-      $country_filter = "SELECT bd.nid_hbw FROM bird_countries as bd WHERE ";
+      $country_filter = "SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE ";
       
       $country_filter .= 'bd.tid_hbw = ' . implode(' OR bd.tid_hbw = ', $_SESSION['global_filter']['view_taxo_paisos']);
 
@@ -317,11 +317,14 @@ function get_global_filter_countries() {
     return $country_filter;
 }
 
+
+
 function bird_taxonomies_views_query_alter(&$view, &$query) {
   // (Example assuming a view with an exposed filter on node title.)
   // If the input for the title filter is a positive integer, filter against
   // node ID instead of node title.
   if ($view->name == 'species_table_by_family') {
+    
     // Miramos si se ha de filtrar por paises
     $country_filter = get_global_filter_countries_select();
     
@@ -345,8 +348,67 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
                    'args' => array(),
                  );
     }
-  }
-}
+  } // species_table_by_family
+  
+  
+  // filtrem les views de species list a la pag de familia i la pagina my-list
+  if (($view->name == 'taxo_tree3')  || ($view->name == 'my_list')){
+    // Miramos si se ha de filtrar por paises
+    $country_filter = get_global_filter_countries_select();
+   
+    if(!empty($country_filter)) {     
+          
+      $result = db_query($country_filter);
+     
+      $nids = array();
+      foreach ($result as $record) {
+          $nids[] = $record->nid_hbw;
+      }
+
+      $view->query->where[] = 
+            array( 'type' => 'AND',
+                   'conditions' => array( 0 => array( 'field'    => 'field_sp_family_nr_node.nid',
+                                                      'operator' => 'in',
+                                                      'value'    => $nids, 
+                                                    ),
+                                        ),
+                   'args' => array(),
+                 );
+
+    } 
+  }  // taxo-tree3  &  my_list
+  
+  // filtro de countries por paises, si hay algunos selecionados..
+  if ($view->name == 'galley_fluid'){
+    
+    if(isset($view->exposed_raw_input['image_style'])) {
+      $view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'];
+    }
+    
+    $country_filter = get_global_filter_countries_select();
+   
+    if(!empty($country_filter)) {     
+          
+      $result = db_query($country_filter);
+     
+      $nids = array();
+      foreach ($result as $record) {
+          $nids[] = $record->nid_hbw;
+      }
+      $view->query->where[] = 
+            array( 'type' => 'AND',
+                   'conditions' => array( 0 => array( 'field'    => 'field_data_field_figure_sp.field_figure_sp_nid',
+                                                      'operator' => 'in',
+                                                      'value'    => $nids, 
+                                                    ),
+                                        ),
+                   'args' => array(),
+                 );
+
+    } 
+  }  // galley_fluid - plates filtrads!
+  
+} // views_query_alter
 
 
 function bird_taxonomies_form_global_filter_1_alter(&$form, &$form_state, $form_id) {
@@ -359,7 +421,11 @@ function bird_taxonomies_form_global_filter_1_alter(&$form, &$form_state, $form_
   
   //dsm($continentes);
   
-  $form['view_taxo_paisos']['#options'] = $continentes + $form['view_taxo_paisos']['#options'];
+  //comento la siguiente linia porque daba este error al mostrar, por ejemplo, esta URL: 
+  //http://hbw/biblio/duplicats/search?field_bib_author_value_op=%3D&field_bib_author_value=&field_bib_author_value_1_op=%3D&field_bib_author_value_1=&field_bib_year_value_op=%3D&field_bib_year_value[value]=&field_bib_year_value[min]=&field_bib_year_value[max]=&field_bib_ref_name_value_op=%3D&field_bib_ref_name_value=&field_bib_hbw_volume_value=&items_per_page=10&page=29
+  //Error que daba: Fatal error: Unsupported operand types in /var/www/hbw/sites/all/modules/bird_taxonomies/bird_taxonomies.module on line 419
+  //$form['view_taxo_paisos']['#options'] = $continentes + $form['view_taxo_paisos']['#options'];
+
   //dsm($form['view_taxo_paisos']['#options']);
   
   //array_unshift(, $form['view_taxo_paisos']['#options']);
@@ -383,12 +449,12 @@ function bird_taxonomies_continents() {
 }
 
 function bird_taxonomies_form_alter(&$form, &$form_state, $form_id) {
-  if($form_id == 'views_exposed_form') {
-    /*$form['style'] = array( '#type'    => 'select',
+  /*if($form_id == 'views_exposed_form') {
+    $form['style'] = array( '#type'    => 'select',
                              '#options' => bird_taxonomies_plates_styles(),
-                           );*/
+                           );
     //dsm($form);
-  }
+  }*/
 }
 
 function bird_taxonomies_plates_styles() {
@@ -397,4 +463,18 @@ function bird_taxonomies_plates_styles() {
                'plate_30' => t('Large'), 
                'plate_40' => t('Extra Large'),
              );
+}
+
+/**
+ * Implentation of HOO_views_api()
+ *
+ * @return array An associative array of views options.
+ */
+function bird_taxonomies_views_api() {
+  $array =  array(
+   'api' => 3,
+   'path' => drupal_get_path('module', 'bird_taxonomies') . '/views',
+  );
+    
+  return $array;
 }
