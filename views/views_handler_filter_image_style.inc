@@ -11,9 +11,10 @@ class views_handler_filter_image_style extends views_handler_filter {
     $form['value'] = array(
       '#type' => 'select',
       '#title' => t('Image Style'),
-      '#default_value' => isset($this->value) ? $this->value : array_pop($options),
+      '#default_value' => array_shift(array_keys($options)),
       '#options' => $options,
     );
+        
     return $form;
   }
 

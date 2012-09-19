@@ -27,7 +27,8 @@ jQuery(document).ready(function($) {
          if($(family).parent().parent().children('.container').length == 0) {
           jQuery.ajax({
             type: 'POST',
-            url: Drupal.settings.basePath + 'bird_taxonomies/ajax/species/' + family_id,
+            url: Drupal.settings.basePath + 'bird_taxonomies/ajax/species/' + family_id + '/' + Drupal.settings.bird_taxonomies.arg[1],
+
             dataType: 'html',
             cache: false,
             success: function(data) {    
@@ -88,5 +89,5 @@ jQuery(document).ready(function($) {
 		    });
 		    return false;
     	});
-
+              
 });
