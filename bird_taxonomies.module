@@ -1,4 +1,3 @@
-
 <?php
 
 /**
@@ -191,7 +190,7 @@ ORDER BY field_data_field_fam_ordenacio.field_fam_ordenacio_value ASC");
   return $families;
 }
 
-function bird_taxonomies_get_species_ajax_callback($family = NULL,$url_nid) {
+function bird_taxonomies_get_species_ajax_callback($family = NULL,$url_nid = 0) {
 
   $species = bird_taxonomies_get_species($family);
 
@@ -246,19 +245,20 @@ FROM
 {node} node
 LEFT JOIN {field_data_field_ssp_species} field_data_field_ssp_species ON node.nid = field_data_field_ssp_species.entity_id AND (field_data_field_ssp_species.entity_type = 'node' AND field_data_field_ssp_species.deleted = '0')
 LEFT JOIN {node} node_field_data_field_ssp_species ON field_data_field_ssp_species.field_ssp_species_nid = node_field_data_field_ssp_species.nid
-WHERE (( (node.status = '1') AND (node.type IN  ('subspecies')) AND (node_field_data_field_ssp_species.nid = :specie) ))
+WHERE (( (node.status = '1') AND (node.type IN ('subspecies')) AND (node_field_data_field_ssp_species.nid = :specie) ))
 ORDER BY node_title DESC",array(':specie' => $specie));
-   
-  foreach ($result as $record) {  
+  
+  foreach ($result as $record) {
     // Do something with each $record
     //dsm($record);
     /*$species[$record->node_field_data_field_fam_order_nid ][$record->nid] = array( 'data' => l($record->node_title,'node/'.$record->nid),
       'class' => array('families'));  
       */
-      $subspecies[] = $record;
+    $subspecies[] = $record;
   }
-    
-  return $subspecies;
+  if (!empty($subspecies)) {
+    return $subspecies;
+  }
 }
  
 function bird_taxonomies_get_species_family_group() {
@@ -296,7 +296,7 @@ LEFT JOIN {node} node_field_data_field_sp_family_nr ON field_data_field_sp_famil
   return $species;
 }
 
-function bird_taxonomies_get_subspecies_ajax_callback($specie = NULL, $url_nid) {
+function bird_taxonomies_get_subspecies_ajax_callback($specie = NULL, $url_nid = 0) {
 
   $subspecies = bird_taxonomies_get_subspecies($specie);
 
@@ -326,15 +326,22 @@ function theme_bird_taxonomies_bird_species($variables) {
 
   //dsm($species);
   //dsm($url_nid);
-    
-  $node = node_load($url_nid);   
+  
+  if(is_numeric($url_nid) && $url_nid > 0) {
+    $node = node_load($url_nid);   
+  
   //dsm($node);
   
-  $node_actual_specie = $url_nid;
-    // Si es una especie entonces tenemos que buscar a su padre
-  if($node->type == 'subspecies') {
-    $node_actual_specie = $node->field_ssp_species['und'][0]['nid'];
-  } 
+    $node_actual_specie = $url_nid;
+      // Si es una especie entonces tenemos que buscar a su padre
+    if($node->type == 'subspecies') {
+      $node_actual_specie = $node->field_ssp_species['und'][0]['nid'];
+    } 
+  }
+  else {
+    $node_actual_specie = 0;
+  }
+  
   
   if(!empty($species)) {
     foreach($species as $specie) { 
@@ -360,11 +367,15 @@ function theme_bird_taxonomies_bird_subspecies($variables) {
   $subspecies = $variables['subspecies'];
   $url_nid = $variables['url_nid'];
   
- 
-  foreach($subspecies as $subspecie) {
-    $items[] = '<span class="a-wrapper clearfix">'.l($subspecie->node_title,'node/'.$subspecie->nid,array('attributes' => array('class' => array(($url_nid == $subspecie->nid) ? 'selected' : '')))).'<span class="go"><span>-></span></span></span>';
+  if(!empty($subspecies)) {
+    foreach($subspecies as $subspecie) {
+      $items[] = '<span class="a-wrapper clearfix">'.l($subspecie->node_title,'node/'.$subspecie->nid,array('attributes' => array('class' => array(($url_nid == $subspecie->nid) ? 'selected' : '')))).'<span class="go"><span>-></span></span></span>';
+    }
   }
-    
+  else {
+    $items[] = array( 'data' => '<span class="a-wrapper clearfix">'. t('This species has no subspecies') . '</span>');
+  }
+  
   $output = theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'subspecies clearfix')));
   
   return $output;
@@ -584,10 +595,3 @@ function bird_taxonomies_views_api() {
   
   return $array;
 }
-
-
-    
-    
-
-
-

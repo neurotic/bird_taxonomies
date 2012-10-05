@@ -23,11 +23,19 @@ jQuery(document).ready(function($) {
    	     $(family).parent().parent('li').toggleClass('selected');
     	   family_id = $(family).parent().parent('li').attr('id');
     	   family_id = family_id.substring(3,family_id.length);
-         // Miramos si ya esta puesto y sino lo obteneos
+         
+         if(Drupal.settings.bird_taxonomies.arg[1] > 0) {
+          nid_url = Drupal.settings.bird_taxonomies.arg[1];
+         }
+         else {
+          nid_url = 0;
+         }
+         
+         // Miramos si ya esta puesto y sino lo obteneos         
          if($(family).parent().parent().children('.container').length == 0) {
           jQuery.ajax({
             type: 'POST',
-            url: Drupal.settings.basePath + 'bird_taxonomies/ajax/species/' + family_id + '/' + Drupal.settings.bird_taxonomies.arg[1],
+            url: Drupal.settings.basePath + 'bird_taxonomies/ajax/species/' + family_id + '/' + nid_url,
 
             dataType: 'html',
             cache: false,
@@ -51,12 +59,17 @@ jQuery(document).ready(function($) {
     	   specie_id = $(specie).parent().parent('li').attr('id');
     	   specie_id = specie_id.substring(3,specie_id.length);
   	     
-        //alert(Drupal.settings.basePath + 'bird_taxonomies/ajax/subspecies/' + specie_id);
-        // Miramos si ya esta puesto y sino lo obteneos
+         if(Drupal.settings.bird_taxonomies.arg[1] > 0) {
+          nid_url = Drupal.settings.bird_taxonomies.arg[1];
+         }
+         else {
+          nid_url = 0;
+         }
+                 // Miramos si ya esta puesto y sino lo obteneos
         if($(specie).parent().parent().children('.container').length == 0) {
           jQuery.ajax({
             type: 'POST',
-            url: Drupal.settings.basePath + 'bird_taxonomies/ajax/subspecies/' + specie_id,
+            url: Drupal.settings.basePath + 'bird_taxonomies/ajax/subspecies/' + specie_id + '/' + nid_url,
             dataType: 'html',
             cache: false,
             success: function(data) {      
