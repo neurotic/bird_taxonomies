@@ -10,7 +10,7 @@ jQuery(document).ready(function($) {
     	}
     	/*$('#block-bird-taxonomies-bird-orders .content ul li a').append('<span class="plus">+</span>');*/
     	
-      $('.orders > li > .a-wrapper > a').click(function() {
+      $('.orders > li > .a-wrapper > a.name').click(function() {
         plus = $(this);
         $(plus).parent().parent('li').toggleClass('selected');
 		    $(this).parent().next('.item-list').children('ul').slideToggle('slow', function() {		      
@@ -18,7 +18,7 @@ jQuery(document).ready(function($) {
 		    return false;
     	});
     	
-    	$('.families > li > .a-wrapper > a').click(function() {
+    	$('.families > li > .a-wrapper > a.name').click(function() {
     	   family = $(this);
    	     $(family).parent().parent('li').toggleClass('selected');
     	   family_id = $(family).parent().parent('li').attr('id');
@@ -53,7 +53,7 @@ jQuery(document).ready(function($) {
 		    return false;
     	});
     	
-    	$(document).delegate('.species > li > .a-wrapper > a', 'click', function() {
+    	$(document).delegate('.species > li > .a-wrapper > span.plus', 'click', function() {
     	   specie = $(this);
     	   $(specie).parent().parent('li').toggleClass('selected');
     	   specie_id = $(specie).parent().parent('li').attr('id');
@@ -65,7 +65,7 @@ jQuery(document).ready(function($) {
          else {
           nid_url = 0;
          }
-                 // Miramos si ya esta puesto y sino lo obteneos
+        // Miramos si ya esta puesto y sino lo obteneos
         if($(specie).parent().parent().children('.container').length == 0) {
           jQuery.ajax({
             type: 'POST',
@@ -88,7 +88,7 @@ jQuery(document).ready(function($) {
     	});
     	
     	$(document).delegate('.orders span.go','click',function() {
-    	 window.location = $(this).prev('a').attr('href');
+    	 //window.location = $(this).prev('a').attr('href');
     	});
     	
     	$('#block-bird-taxonomies-bird-orders h2').click(function() {
