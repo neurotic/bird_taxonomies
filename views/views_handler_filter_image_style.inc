@@ -4,7 +4,7 @@
  * @file
  * Handler to filter based on locked nodes
  */
- 
+  
 class views_handler_filter_image_style extends views_handler_filter {
   function value_form(&$form, &$form_state) {
     $options = bird_taxonomies_plates_styles();

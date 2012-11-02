@@ -37,6 +37,14 @@ function bird_taxonomies_views_data(){
   );
   
   // Our Handlers:
+  $data['bird_taxonomies']['image_mode'] = array(
+    'title' => t('Image Mode'),
+    'help' => t('To choose the mode image style in Plates'),
+    'filter' => array(
+      'handler' => 'views_handler_filter_image_mode',
+    ),
+  );
+  
   $data['bird_taxonomies']['image_style'] = array(
     'title' => t('Image Style'),
     'help' => t('To choose the image style in Plates'),
@@ -44,28 +52,7 @@ function bird_taxonomies_views_data(){
       'handler' => 'views_handler_filter_image_style',
     ),
   );
+
   
   return $data;
 }
-
-/**
- * Implementation of hook_views_handlers()
- */ 
- /*
-function bird_taxonomies_views_handlers(){
-  $array = array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'bird_taxonomies') . '/views',
-    ),
-    'handlers' => array(
-      'views_handler_filter_image_style' => array(
-        'parent' => 'views_handler_filter', //views_handler_filter_boolean_operator',
-      ),
-    ),
-  );
-  
-  dsm($array);
-  
-  return $array;
-}
-*/
