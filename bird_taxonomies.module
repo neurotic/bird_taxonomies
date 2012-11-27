@@ -200,11 +200,12 @@ function bird_taxonomies_get_species_ajax_callback($family = NULL,$url_nid = 0) 
   
 function bird_taxonomies_get_species($family = NULL) {
     
-    $query = "SELECT distinct(node.title) AS node_title, node.nid AS nid, field_data_field_sp_ordre2.field_sp_ordre2_value AS field_data_field_sp_ordre2
+    $query = "SELECT distinct(node.title) AS node_title, node.nid AS nid, field_data_field_sp_ordre2.field_sp_ordre2_value AS field_data_field_sp_ordre2, field_data_field_sp_monotypic.field_sp_monotypic_value AS sp_monotypic
 FROM
 {node} node
 LEFT JOIN {field_data_field_sp_family_nr} field_data_field_sp_family_nr ON node.nid = field_data_field_sp_family_nr.entity_id AND (field_data_field_sp_family_nr.entity_type = 'node' AND field_data_field_sp_family_nr.deleted = '0')
 LEFT JOIN {node} node_field_data_field_sp_family_nr ON field_data_field_sp_family_nr.field_sp_family_nr_nid = node_field_data_field_sp_family_nr.nid
+LEFT JOIN {field_data_field_sp_monotypic} field_data_field_sp_monotypic ON node.nid = field_data_field_sp_monotypic.entity_id
 LEFT JOIN {field_data_field_sp_ordre2} field_data_field_sp_ordre2 ON node.nid = field_data_field_sp_ordre2.entity_id";
   
   if($countries_filter = get_global_filter_countries()) {
@@ -344,7 +345,11 @@ function theme_bird_taxonomies_bird_species($variables) {
   
   if(!empty($species)) {
     foreach($species as $specie) { 
-      $item = array( 'data' => '<span class="a-wrapper clearfix">'.l(_hba_cursive($specie->node_title),'node/'.$specie->nid,array('attributes' => array('title' => 'Click to go to this species account'),'html' => true)).'<span class="go plus"><span>+</span></span></span>', 'id' => 'id-' . $specie->nid, 'title' => 'Click to expand the subspecies of this species', 'class' => array(($node_actual_specie == $specie->nid) ? 'selected' : ''));
+      $data = '<span class="a-wrapper clearfix">'.l(_hba_cursive($specie->node_title),'node/'.$specie->nid,array('attributes' => array('title' => 'Click to go to this species account'),'html' => true));
+      if(!$specie->sp_monotypic) {
+        $data .= '<span class="go plus"><span>+</span></span></span>';
+      }
+      $item = array( 'data' => $data, 'id' => 'id-' . $specie->nid, 'title' => 'Click to expand the subspecies of this species', 'class' => array(($node_actual_specie == $specie->nid) ? 'selected' : ''));
       if($specie->nid == $node_actual_specie) {
         //dsm($item['data']);
         $item['data'] = $item['data'] . '<div class="container" style="display: block;">' . theme('bird_taxonomies_bird_subspecies',array('subspecies' => bird_taxonomies_get_subspecies($specie->nid), 'url_nid' => $url_nid)) . '</div>';
@@ -495,7 +500,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
   }  // taxo-tree3 & my_list
       
   // filtro de countries por paises, si hay algunos selecionados..
-  if ($view->name == 'galley_fluid'){
+  if ($view->name == 'galley_fluid' && $view->current_display == 'page'){
     
     //dsm($view->exposed_raw_input['image_style']);
      
@@ -506,7 +511,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
       $view->field['field_figure_img']->options['settings']['image_style'] = array_shift(array_keys(bird_taxonomies_plates_styles()));
     }
     
-    dsm($view->exposed_raw_input['image_mode']);
+    //dsm($view->exposed_raw_input['image_mode']);
     if(isset($view->exposed_raw_input['image_mode']) && $view->exposed_raw_input['image_mode'] != 'All') {
       $view->field['field_figure_img']->options['settings']['image_style'] .= "_" . $view->exposed_raw_input['image_mode'];
     }
@@ -589,16 +594,17 @@ function bird_taxonomies_form_alter(&$form, &$form_state, $form_id) {
 }
 
 function bird_taxonomies_plates_styles() {
- return array( 'plate_10' => t('Small'),
-               'plate_20' => t('Medium'),
-               'plate_30' => t('Large'),
-               'plate_40' => t('Extra Large'),
+ return array( 'tiny' => t('Tiny'),
+               'small' => t('Small'),
+               'medium' => t('Medium'),
+               'large' => t('Large'),
+               'huge' => t('Huge'),
              );
 }
 
 function bird_taxonomies_plates_modes() {
- return array( 'absolute' => t('Absolute'),
-               'percentage' => t('Percentage'),
+ return array( 'a' => t('Absolute'),
+               'p' => t('Percentage'),
              );
 }
 
