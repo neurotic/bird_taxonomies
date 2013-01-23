@@ -316,7 +316,15 @@ function bird_taxonomies_menu_state() {
 function theme_bird_taxonomies_bird_orders($variables) {
   $orders = $variables['orders'];
 
-  $output = theme('item_list', array('items' => $orders, 'attributes' => array ('class' => 'orders clearfix')));
+  $output = '';
+
+  if (arg(1) != 'search') {
+    $block = block_load('block', 28);      
+    //$output .= '<div class="label">Search on Common mame</div>' . drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
+    $output .= drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
+  }
+  
+  $output .= theme('item_list', array('items' => $orders, 'attributes' => array ('class' => 'orders clearfix')));
 
   return $output;
 }
@@ -615,8 +623,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
 function bird_taxonomies_views_pre_render(&$view) { // 
     if ($view->name == 'country_term_page' && $view->current_display == 'page')
     {
-        drupal_set_title('Country name');
-        //dpm($view);
+        drupal_set_title(db_query('SELECT name FROM {taxonomy_term_data} where tid = :tid limit 1',array(':tid' =>$view->args['0']))->fetchField());
     }
 }
   
@@ -676,7 +683,7 @@ function bird_taxonomies_continents() {
             $tabla_continents[] = $una_region;
         }
 
-        cache_set('bird_tax_cont', $tabla_continents, 'cache',time()+120);
+        cache_set('bird_tax_cont', $tabla_continents, 'cache',time()+3600);
         return $tabla_continents;
     }
 }
