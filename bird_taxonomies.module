@@ -318,7 +318,9 @@ function theme_bird_taxonomies_bird_orders($variables) {
 
   $output = '';
 
-  if (arg(1) != 'search') {
+  // block visibility controled from here, not on the block page - do not show for /species/search and or /species/home
+  $url_composed = arg(0).'/'.arg(1);
+  if (($url_composed != ('node/202110')) && ($url_composed != ('species/search'))){
     $block = block_load('block', 28);      
     //$output .= '<div class="label">Search on Common mame</div>' . drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
     $output .= drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
