@@ -34,17 +34,19 @@ function bird_taxonomies_block_info() {
   $blocks['bird_orders'] = array(
     'info' => t('Bird Orders'),
   );
-  
+  $blocks['prices_table'] = array(
+    'info' => t('Prices table'),
+  );
   return $blocks;
 }
-  
+
 /**
   * Implements hook_taxonomies_block_view()
   */
 function bird_taxonomies_block_view($delta = '') {
   // This example is adapted from node.module.
   $block = array();
- 
+
   switch ($delta) {
     case 'bird_orders':
       $block['subject'] = t('Bird Orders');
@@ -53,10 +55,14 @@ function bird_taxonomies_block_view($delta = '') {
         '#theme' => 'bird_taxonomies_bird_orders',
       );
       break;
+    case 'prices_table':
+      $block['subject'] = t('Prices Table');
+      $block['content'] = theme('bird_taxonomies_prices_table');
+      break;
   }
   return $block;
 }
-    
+
 /**
   * Implements hook_theme()
   */
@@ -71,19 +77,22 @@ function bird_taxonomies_theme($existing, $type, $theme, $path) {
     'bird_taxonomies_bird_subspecies' => array(
       'variables' => array('subspecies' => NULL, 'url_nid' => NULL,
     )),
+    'bird_taxonomies_prices_table' => array(
+      'variables' => array()
+     ),
   );
 }
-          
+
 function bird_taxonomies_bird_orders() {
-        
+
   $result = db_query("SELECT node.title AS node_title, node.nid AS nid
                       FROM
                       node node, field_data_field_ord_ordenacion ord
                       WHERE (( (node.status = '1') AND (node.nid = ord.entity_id) AND (node.type IN  ('order')) ))
                       ORDER BY ord.field_ord_ordenacion_value ASC");
-      
+
   $orders = array();
-       
+
   // Cargamos el nodo actual
   if(arg(0) == 'node' && is_numeric(arg(1))) {
     $node_actual = arg(1);
@@ -96,28 +105,28 @@ function bird_taxonomies_bird_orders() {
   //dsm($node_actual);
 
   $families = bird_taxonomies_get_families($node_actual);
-  
-  
+
+
   //dsm($node);
   if($node = node_load($node_actual)) {
     if($node->type == 'subspecies') {
       $node = node_load($node->field_ssp_species['und'][0]['nid']);
       $node_actual = $node->nid;
     }
-      
+
     // Si es una especie entonces tenemos que buscar a su padre
     if($node->type == 'species') {
       $node = node_load($node->field_sp_family_nr['und'][0]['nid']);
       $node_actual = $node->nid;
     }
-          
+
     if($node->type == 'family') {
         $node_actual = $node->field_fam_order['und'][0]['nid'];
     }
   }
-                   
+
   //dsm($families);
-                                                      
+
   if(!empty($families)) {
     foreach ($result as $record) {
       if(!empty($families[$record->nid])) {
@@ -126,12 +135,12 @@ function bird_taxonomies_bird_orders() {
       }
     }
   }
-  
+
   return $orders;
 }
-    
+
 function bird_taxonomies_get_families($node_actual = 0 ) {
-    
+
   $result = db_query("SELECT node.title AS node_title, node.nid AS nid, node_field_data_field_fam_order.nid AS node_field_data_field_fam_order_nid, node.created AS node_created, 'node' AS field_data_field_fam_order_ibc_node_entity_type
 FROM
 {node} node
@@ -140,17 +149,17 @@ LEFT JOIN {node} node_field_data_field_fam_order ON field_data_field_fam_order.f
 LEFT JOIN {field_data_field_fam_ordenacio} field_data_field_fam_ordenacio ON node.nid = field_data_field_fam_ordenacio.entity_id
 WHERE (( (node.status = '1') AND (node.type IN  ('family')) ))
 ORDER BY field_data_field_fam_ordenacio.field_fam_ordenacio_value ASC");
-      
+
   $families = array();
-                   
+
   $node_actual_family = 0;
-                                                      
+
   if($node_actual) {
     $node = node_load($node_actual);
     //dsm($node);
-                   
+
     $node_actual_family = $node_actual;
-     
+
     if($node->type == 'subspecies') {
       $node = node_load($node->field_ssp_species['und'][0]['nid']);
     }
@@ -159,7 +168,7 @@ ORDER BY field_data_field_fam_ordenacio.field_fam_ordenacio_value ASC");
       $node_actual_family = $node->field_sp_family_nr['und'][0]['nid'];
     }
   }
-      
+
   //dsm($node_actual);
   //dsm($node_actual_family);
 
@@ -175,12 +184,12 @@ ORDER BY field_data_field_fam_ordenacio.field_fam_ordenacio_value ASC");
     }
   }
   else {
-    foreach ($result as $record) {   
+    foreach ($result as $record) {
       $families[$record->node_field_data_field_fam_order_nid][$record->nid] = array( 'data' => '<span class="a-wrapper clearfix">'.l($record->node_title,'node/'.$record->nid,array('attributes' => array('title' => 'Click to expand the species of this family','class' => array('name')))) . '<a title="Click to see this family account" href="'.url('node/'.$record->nid).'" class="go"><span>-></span></a></span>', 'id' => 'id-' . $record->nid, 'class' => ($node_actual_family == $record->nid) ? 'selected' : '');
-      
+
       //dsm($node_actual);
       //dsm($record->nid);
-                                                      
+
       if($node_actual_family == $record->nid) {
           $families[$record->node_field_data_field_fam_order_nid][$record->nid]['data'] .=  '<div class="container" style="display: block;">' . theme('bird_taxonomies_bird_species',array('species' => bird_taxonomies_get_species($record->nid), 'url_nid' => $node_actual)) . '</div>';
       }
@@ -197,7 +206,7 @@ function bird_taxonomies_get_species_ajax_callback($family = NULL,$url_nid = 0) 
   print theme('bird_taxonomies_bird_species',array('species' => $species, 'url_nid' => $url_nid));
   exit();
 }
-  
+
 function bird_taxonomies_get_species($family = NULL) {
     //creo index a la BD: ALTER TABLE `hbw`.`bird_countries` ADD INDEX `tid_hbw`(`tid_hbw`);
     $query = "SELECT distinct(node.title) AS node_title, node.nid AS nid, field_data_field_sp_ordre2.field_sp_ordre2_value AS field_data_field_sp_ordre2, field_data_field_sp_monotypic.field_sp_monotypic_value AS sp_monotypic
@@ -211,34 +220,34 @@ LEFT JOIN {field_data_field_sp_ordre2} field_data_field_sp_ordre2 ON node.nid = 
   if($countries_filter = get_global_filter_countries()) {
     $query .= " INNER JOIN bird_countries ON node.nid = bird_countries.nid_hbw AND bird_countries.tid_hbw IN ($countries_filter)";
   }
-  
+
   $query .= " WHERE (( (node.status = '1') AND (node.type IN  ('species'))";
- 
+
   if($family) {
     $query .= "AND (node_field_data_field_sp_family_nr.nid = :family )";
   }
- 
+
 
   $query .= " )) ORDER BY field_data_field_sp_ordre2 ASC";
-  
+
   //dsm($query);
-                             
+
   if($family) {
     $result = db_query($query,array(':family' => $family));
   }
   else {
     $result = db_query($query);
   }
- 
+
   $species = array();
 
   foreach ($result as $record) {
       $species[] = $record;
   }
-                             
+
   return $species;
 }
- 
+
 function bird_taxonomies_get_subspecies($specie = NULL) {
 
   $result = db_query("SELECT node.title AS node_title, node.nid AS nid, node.created AS node_created
@@ -248,12 +257,12 @@ LEFT JOIN {field_data_field_ssp_species} field_data_field_ssp_species ON node.ni
 LEFT JOIN {node} node_field_data_field_ssp_species ON field_data_field_ssp_species.field_ssp_species_nid = node_field_data_field_ssp_species.nid
 WHERE (( (node.status = '1') AND (node.type IN ('subspecies')) AND (node_field_data_field_ssp_species.nid = :specie) ))
 ORDER BY node_title DESC",array(':specie' => $specie));
-  
+
   foreach ($result as $record) {
     // Do something with each $record
     //dsm($record);
     /*$species[$record->node_field_data_field_fam_order_nid ][$record->nid] = array( 'data' => l($record->node_title,'node/'.$record->nid),
-      'class' => array('families'));  
+      'class' => array('families'));
       */
     $subspecies[] = $record;
   }
@@ -261,7 +270,7 @@ ORDER BY node_title DESC",array(':specie' => $specie));
     return $subspecies;
   }
 }
- 
+
 function bird_taxonomies_get_species_family_group() {
 
     $query = "SELECT node.title AS node_title, node.nid AS nid, field_data_field_sp_family_nr.field_sp_family_nr_nid AS family_nid
@@ -321,11 +330,11 @@ function theme_bird_taxonomies_bird_orders($variables) {
   // block visibility controled from here, not on the block page - do not show for /species/search and or /species/home
   $url_composed = arg(0).'/'.arg(1);
   if (($url_composed != ('node/202110')) && ($url_composed != ('species/search'))){
-    $block = block_load('block', 28);      
+    $block = block_load('block', 28);
     //$output .= '<div class="label">Search on Common mame</div>' . drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
     $output .= drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
   }
-  
+
   $output .= theme('item_list', array('items' => $orders, 'attributes' => array ('class' => 'orders clearfix')));
 
   return $output;
@@ -337,24 +346,24 @@ function theme_bird_taxonomies_bird_species($variables) {
 
   //dsm($species);
   //dsm($url_nid);
-  
+
   if(is_numeric($url_nid) && $url_nid > 0) {
-    $node = node_load($url_nid);   
-  
+    $node = node_load($url_nid);
+
   //dsm($node);
-  
+
     $node_actual_specie = $url_nid;
       // Si es una especie entonces tenemos que buscar a su padre
     if($node->type == 'subspecies') {
       $node_actual_specie = $node->field_ssp_species['und'][0]['nid'];
-    } 
+    }
   }
   else {
     $node_actual_specie = 0;
   }
-  
+
   if(!empty($species)) {
-    foreach($species as $specie) { 
+    foreach($species as $specie) {
       $data = '<span class="a-wrapper clearfix">'.l(_hba_cursive($specie->node_title),'node/'.$specie->nid,array('attributes' => array('title' => 'Click to go to this species account'),'html' => true));
       if(!$specie->sp_monotypic) {
         $data .= '<span class="go plus"><span title="Click to view the subspecies of this species">+</span></span>';
@@ -370,20 +379,20 @@ function theme_bird_taxonomies_bird_species($variables) {
   }
   else {
     $items[] = array('data' => '<span class="a-wrapper clearfix">'. t('No species with this filter') . '</span>');
-  
+
   }
 
   $output = theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'species clearfix')));
-  
+
   return $output;
 }
-  
+
 function theme_bird_taxonomies_bird_subspecies($variables) {
   $subspecies = $variables['subspecies'];
   $url_nid = $variables['url_nid'];
-  
+
   $items = array();
-  
+
   if(!empty($subspecies)) {
     foreach($subspecies as $subspecie) {
       /*$items[] = '<span class="a-wrapper clearfix">'.l($subspecie->node_title,'node/'.$subspecie->nid,array('attributes' => array('class' => array(($url_nid == $subspecie->nid) ? 'selected' : '')))).'<a haref="'.url('node/'.$subspecie->nid).'" class="go"><span>-></span></a></span>';*/
@@ -393,43 +402,125 @@ function theme_bird_taxonomies_bird_subspecies($variables) {
   /*else {
     $items[] = array( 'data' => '<span class="a-wrapper clearfix">'. t('This species has no subspecies') . '</span>');
   }*/
-  
+
   $output = '';
-  
+
   if(count($items) > 0) {
     $output = theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'subspecies clearfix')));
   }
-  
+
   return $output;
 }
-  
+
+function theme_bird_taxonomies_prices_table($variables) {
+  $output = '
+<table id="plan-comparison">
+  <thead>
+    <tr class="row1 odd">
+      <th class="col1"><div>&nbsp;</div></th>
+      <th class="col2"><div>registered</div></th>
+      <th class="col3"><div>basic</div></th>
+      <th class="col4"><div>supporting</div></th>
+      <th class="col5"><div>institutional</div></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="row2 even">
+      <td class="col1"><div>Species accounts</span></div></td>
+      <td class="col2"><div>25</div></td>
+      <td class="col3"><div>all</div></td>
+      <td class="col4"><div>all</div></td>
+      <td class="col5"><div>all</div></td>
+    </tr>
+    <tr class="row3 odd">
+      <td class="col1"><div>Manage newsletters</span></div></td>
+      <td class="col2"><div class="true"><span>true</span></div></td>
+      <td class="col3"><div class="true"><span>true</span></div></td>
+      <td class="col4"><div class="true"><span>true</span></div></td>
+      <td class="col5"><div class="true"><span>true</span></div></td>
+    </tr>
+    <tr class="row4 even">
+      <td class="col1"><div>Get access to all the contents</span></div></td>
+      <td class="col2"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div class="true"><span>true</span></div></td>
+      <td class="col4"><div class="true"><span>true</span></div></td>
+      <td class="col5"><div class="true"><span>true</span></div></td>
+    </tr>
+    <tr class="row5 odd">
+      <td class="col1"><div>Viability of the project</span></div></td>
+      <td class="col2"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div class="false"><span>false</span></div></td>
+      <td class="col4"><div class="true"><span>true</span></div></td>
+      <td class="col5"><div class="true"><span>true</span></div></td>
+    </tr>
+    <tr class="row6 even">
+      <td class="col1"><div>Have personal control of species</span></div></td>
+      <td class="col2"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div class="false"><span>false</span></div></td>
+      <td class="col4"><div class="true"><span>true</span></div></td>
+      <td class="col5"><div class="true"><span>true</span></div></td>
+    </tr>
+    <tr class="row7 odd">
+      <td class="col1"><div>New features enabled automatically</span></div></td>
+      <td class="col2"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div class="false"><span>false</span></div></td>
+      <td class="col4"><div class="true"><span>true</span></div></td>
+      <td class="col5"><div class="true"><span>true</span></div></td>
+    </tr>
+    <tr class="row8 even">
+      <td class="col1"><div>View more information for reference</span></div></td>
+      <td class="col2"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div class="false"><span>false</span></div></td>
+      <td class="col4"><div class="true"><span>true</span></div></td>
+      <td class="col5"><div class="true"><span>true</span></div></td>
+    </tr>
+    <tr class="row9 odd">
+      <td class="col1"><div>Concurrent users</span></div></td>
+      <td class="col2"><div>1</div></td>
+      <td class="col3"><div>1</div></td>
+      <td class="col4"><div>1</div></td>
+      <td class="col5"><div>10</div></td>
+    </tr>
+    <tr class="row10 even">
+      <td class="col1"><div>&nbsp;</span></div></td>
+      <td class="col2"><div><a href="#">sign up</a></div></td>
+      <td class="col3"><div><a href="#">sign up</a></div></td>
+      <td class="col4"><div><a href="#">sign up</a></div></td>
+      <td class="col5"><div><a href="#">sign up</a></div></td>
+    </tr>
+  </tbody>
+</table>';
+
+  return $output;
+}
+
 function get_global_filter_countries_select() {
     $countries = array();
     $country_filter = '';
-        
+
     if(!empty($_SESSION['global_filter']['view_taxo_paisos'])) {
-      
+
       $country_filter = "SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE ";
-      
+
       //a $_SESSION['global_filter']['view_taxo_paisos'] hi ha tids que no son de pais! s'ha de mirar si son de Europe, etc i substituirlos pels tids dels fills!
-      
+
       //$country_filter .= 'bd.tid_hbw = ' . implode(' OR bd.tid_hbw = ', $_SESSION['global_filter']['view_taxo_paisos']);
       $country_filter .= 'bd.tid_hbw  IN (' . get_global_filter_countries().')';
-  
+
     }
     else {
       $country_filter = false;
     }
-      
+
     return $country_filter;
 }
-       
+
 function get_global_filter_countries() {
     $country_filter = '';
-       
+
     if(!empty($_SESSION['global_filter']['view_taxo_paisos'])) {
       $continents = bird_taxonomies_continents();
-        
+
       // para cada elemento (pais o region) del global filter...
       foreach($_SESSION['global_filter']['view_taxo_paisos'] as $country) {
 
@@ -450,7 +541,7 @@ function get_global_filter_countries() {
         }
 
       } //foreach elemento
-      
+
       // Si el ultimo elemento tiene una coma se la quitamos
       $country_filter= trim($country_filter);
       if(substr($country_filter, strlen($country_filter)-1,1) == ',') {
@@ -468,26 +559,26 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
   // (Example assuming a view with an exposed filter on node title)
   // If the input for the title filter is a positive integer, filter against
   // node ID instead of node title.
-  
+
   // Aqui Filtramos:
   //  - la tabla de las sp en los nodes Family
   //  - la view que determina el orden de las sp en la slidebox
   //  - la view per atribuir uns records a un checklist
   if ( ($view->name == 'species_table_by_family') || ($view->name == 'slidebox') || ($view->name == 'set_records') ) {
-  
+
     // Miramos si se ha de filtrar por paises
     $country_filter = get_global_filter_countries_select();
       //dsm($country_filter);
     if(!empty($country_filter)) {
       //$view->header[]
-    
+
       $result = db_query($country_filter);
-      
+
       $nids = array();
       foreach ($result as $record) {
           $nids[] = $record->nid_hbw;
       }
-        
+
       $view->query->where[] =
             array( 'type' => 'AND',
                    'conditions' => array( 0 => array( 'field'    => 'node.nid',
@@ -503,18 +594,18 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
   // Aqui Filtramos:
   //  - la view que proporciona una lista de checkboxes de species para el campo "Species Bulk add" del formulario de Checklist
   if ($view->name == 'checklist_my_sp') {
-  
+
     $country_filter = get_global_filter_countries_select();
     if(!empty($country_filter)) {
       //$view->header[]
-    
+
       $result = db_query($country_filter);
-      
+
       $nids = array();
       foreach ($result as $record) {
           $nids[] = $record->nid_hbw;
       }
-        
+
       $view->query->where[] =
             array( 'type' => 'AND',
                    'conditions' => array( 0 => array( 'field'    => 'node.nid',
@@ -527,12 +618,12 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
     }
     else {
       $result = db_query($country_filter);
-      
+
       $nids = array();
       foreach ($result as $record) {
           $nids[] = $record->nid_hbw;
       }
-        
+
       $view->query->where[] =
             // dummy query to obtain empty result, so any checkbox will be shown in the Checklist form
             array( 'type' => 'AND',
@@ -545,14 +636,14 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
                  );
     }
   } // checklist_my_sp
-   
+
   // filtrem les views de species list a la pag de familia + la pagina my-list
   if ( ($view->name == 'taxo_tree3') || ($view->name == 'my_list') ){
     // Miramos si se ha de filtrar por paises
     $country_filter = get_global_filter_countries_select();
 
     if(!empty($country_filter)) {
-  
+
       $result = db_query($country_filter);
 
       $nids = array();
@@ -569,12 +660,12 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
                                         ),
                    'args' => array(),
                  );
-    
+
     } // if - no hay else, si no tenemos paises activados en el filtro, no se filtra.
   }  // taxo-tree3 & my_list
-  
-    
-    
+
+
+
   // filter the taxonomy/term page for country checklists. The views shows all species, here we limit them using bird_countries.
   if ($view->name == 'country_term_page') {
 
@@ -595,8 +686,8 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
                                             ),
                        'args' => array(),
                      );
-                     
-             // CODI per evitar tenir un camp views php a la view!!!!!        
+
+             // CODI per evitar tenir un camp views php a la view!!!!!
             // let's add bird_countries table to show the status (Vagrant, ...) without the need of having a 'PHP views field'   with the query on it.
             /*
             $view->query->tables['bird_countries'] =
@@ -607,7 +698,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
                     'status' => array ('count' => '1',
                                         'alias' => 'bird_countries_status'),
                     );
-                     
+
             // NO FUNCIONA!!! node.nid NO ES TRANSFORMA EN EL VALOR DEL nid d'un ESPECIE...
             $view->query->where[] =
                 array( 'type' => 'AND',
@@ -617,38 +708,38 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
                                                         ),
                                             ),
                        'args' => array(),
-                     );  
-           */          
+                     );
+           */
         } //is_numeric, we have the tid of the country
   } // end of country pages - views taxonomy/term, rewritten by vid/7 which is the country vocabulary.
-  
-      
-      
+
+
+
   // Definir style de les figures + filtro de countries por paises, si hay algunos seleccionados..
-  if ( (($view->name == 'galley_fluid') && ($view->current_display == 'page' || $view->current_display == 'page_1')) || 
+  if ( (($view->name == 'galley_fluid') && ($view->current_display == 'page' || $view->current_display == 'page_1')) ||
   (($view->name == 'plate') && ($view->current_display == 'page' || $view->current_display == 'page_1' || $view->current_display == 'page_2')) ){
-    
+
     if(isset($view->exposed_raw_input['image_style']) && $view->exposed_raw_input['image_style'] != 'All') {
       $view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'];
     }
     else {
       $view->field['field_figure_img']->options['settings']['image_style'] = array_shift(array_keys(bird_taxonomies_plates_styles()));
     }
-    
+
     if(isset($view->exposed_raw_input['image_mode']) && $view->exposed_raw_input['image_mode'] != 'All') {
       $view->field['field_figure_img']->options['settings']['image_style'] .= "_" . $view->exposed_raw_input['image_mode'];
     }
     else {
       $view->field['field_figure_img']->options['settings']['image_style'] .= "_" . array_shift(array_keys(bird_taxonomies_plates_modes()));
     }
-    
-    //($view->field['field_figure_img']->options['settings']['image_style']);      
+
+    //($view->field['field_figure_img']->options['settings']['image_style']);
     $country_filter = get_global_filter_countries_select();
-       
+
     if(!empty($country_filter)) {
-        
+
       $result = db_query($country_filter);
-     
+
       $nids = array();
       foreach ($result as $record) {
           $nids[] = $record->nid_hbw;
@@ -667,7 +758,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
   }  // galley_fluid - plates filtradas!
 
 } // views_query_alter
-  
+
 // este hook para que se usa???
 function bird_taxonomies_form_global_filter_1_alter(&$form, &$form_state, $form_id) {
   $tabla_continents = bird_taxonomies_continents();
@@ -676,21 +767,21 @@ function bird_taxonomies_form_global_filter_1_alter(&$form, &$form_state, $form_
   foreach($tabla_continents as $key => $continent) {
     $continentes[$key] = $continent['name'];
   };
-    
+
   //dsm($continentes);
 
   //comento la siguiente linia porque daba este error al mostrar, por ejemplo, esta URL:
   //http://hbw/biblio/duplicats/search?field_bib_author_value_op=%3D&field_bib_author_value=&field_bib_author_value_1_op=%3D&field_bib_author_value_1=&field_bib_year_value_op=%3D&field_bib_year_value[value]=&field_bib_year_value[min]=&field_bib_year_value[max]=&field_bib_ref_name_value_op=%3D&field_bib_ref_name_value=&field_bib_hbw_volume_value=&items_per_page=10&page=29
   //Error que daba: Fatal error: Unsupported operand types in /var/www/hbw/sites/all/modules/bird_taxonomies/bird_taxonomies.module on line 419
   //$form['view_taxo_paisos']['#options'] = $continentes + $form['view_taxo_paisos']['#options'];
-  
+
   //dsm($form['view_taxo_paisos']['#options']);
-   
+
   //array_unshift(, $form['view_taxo_paisos']['#options']);
-  
+
 }
 
-// creo que esta funcion no se utiliza nunca y se puede eliminar!!!! no???? - Ferran. 
+// creo que esta funcion no se utiliza nunca y se puede eliminar!!!! no???? - Ferran.
 /*function bird_taxonomies_continent_to_country($continent) {
   $tabla_continents = bird_taxonomies_continents();
 }*/
@@ -702,7 +793,7 @@ function bird_taxonomies_get_tids_from_region($region){
     foreach ($result as $record) {
         $tids[] = $record->tid;
     }
-    return $tids; 
+    return $tids;
 }
 
 // el resultado de esta funcion no cambia casi nunca (cuando se pongan paises nuevos en europa, etc...) asi que hay que cachear el resultado y no calcularlo siempre!!
@@ -765,6 +856,6 @@ function bird_taxonomies_views_api() {
    'api' => 3,
    'path' => drupal_get_path('module', 'bird_taxonomies') . '/views',
   );
-  
+
   return $array;
 }
