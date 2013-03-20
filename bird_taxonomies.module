@@ -413,8 +413,7 @@ function theme_bird_taxonomies_bird_subspecies($variables) {
 }
 
 function theme_bird_taxonomies_prices_table($variables) {
-  $output = '
-<table id="plan-comparison">
+  $output = '<table id="plan-comparison">
   <thead>
     <tr class="row1 odd">
       <th class="col1"><div>&nbsp;</div></th>
@@ -426,63 +425,71 @@ function theme_bird_taxonomies_prices_table($variables) {
   </thead>
   <tbody>
     <tr class="row2 even">
-      <td class="col1"><div>Species accounts</span></div></td>
+      <td class="col1"><div>Species accounts</div></td>
       <td class="col2"><div>25</div></td>
       <td class="col3"><div>all</div></td>
       <td class="col4"><div>all</div></td>
       <td class="col5"><div>all</div></td>
     </tr>
     <tr class="row3 odd">
-      <td class="col1"><div>Manage newsletters</span></div></td>
+      <td class="col1"><div>Family accounts</div></td>
+      <td class="col2"><div>1</div></td>
+      <td class="col3"><div>all</div></td>
+      <td class="col4"><div>all</div></td>
+      <td class="col5"><div>all</div></td>
+    </tr>
+    <tr class="row4 even">
+      <td class="col1"><div>Birdlists</div></td>
+      <td class="col2"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div>unlimited</div></td>
+      <td class="col4"><div>unlimited</div></td>
+      <td class="col5"><div>unlimited</div></td>
+    </tr>
+    <tr class="row5 odd">
+      <td class="col1"><div>Newsletters</div></td>
       <td class="col2"><div class="true"><span>true</span></div></td>
       <td class="col3"><div class="true"><span>true</span></div></td>
       <td class="col4"><div class="true"><span>true</span></div></td>
-      <td class="col5"><div class="true"><span>true</span></div></td>
-    </tr>
-    <tr class="row4 even">
-      <td class="col1"><div>Get access to all the contents</span></div></td>
-      <td class="col2"><div class="false"><span>false</span></div></td>
-      <td class="col3"><div class="true"><span>true</span></div></td>
-      <td class="col4"><div class="true"><span>true</span></div></td>
-      <td class="col5"><div class="true"><span>true</span></div></td>
-    </tr>
-    <tr class="row5 odd">
-      <td class="col1"><div>Viability of the project</span></div></td>
-      <td class="col2"><div class="false"><span>false</span></div></td>
-      <td class="col3"><div class="false"><span>false</span></div></td>
-      <td class="col4"><div class="true"><span>true</span></div></td>
-      <td class="col5"><div class="true"><span>true</span></div></td>
+      <td class="col5"><div class="false"><span>false</span></div></td>
     </tr>
     <tr class="row6 even">
-      <td class="col1"><div>Have personal control of species</span></div></td>
+      <td class="col1"><div>Get access to all the contents</div></td>
       <td class="col2"><div class="false"><span>false</span></div></td>
-      <td class="col3"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div class="true"><span>true</span></div></td>
       <td class="col4"><div class="true"><span>true</span></div></td>
       <td class="col5"><div class="true"><span>true</span></div></td>
     </tr>
     <tr class="row7 odd">
-      <td class="col1"><div>New features enabled automatically</span></div></td>
-      <td class="col2"><div class="false"><span>false</span></div></td>
-      <td class="col3"><div class="false"><span>false</span></div></td>
+      <td class="col1"><div>Create wikicontributions</div></td>
+      <td class="col2"><div class="true"><span>true</span></div></td>
+      <td class="col3"><div class="true"><span>true</span></div></td>
       <td class="col4"><div class="true"><span>true</span></div></td>
-      <td class="col5"><div class="true"><span>true</span></div></td>
+      <td class="col5"><div class="false"><span>false</span></div></td>
     </tr>
     <tr class="row8 even">
-      <td class="col1"><div>View more information for reference</span></div></td>
+      <td class="col1"><div>Control of personal observations</div></td>
+      <td class="col2"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div class="false"><span>false</span></div></td>
+      <td class="col4"><div class="true"><span>true</span></div></td>
+      <td class="col5"><div class="false"><span>false</span></div></td>
+    </tr>
+    
+    <tr class="row9 odd">
+      <td class="col1"><div>Complete control of referenced literature</div></td>
       <td class="col2"><div class="false"><span>false</span></div></td>
       <td class="col3"><div class="false"><span>false</span></div></td>
       <td class="col4"><div class="true"><span>true</span></div></td>
       <td class="col5"><div class="true"><span>true</span></div></td>
     </tr>
-    <tr class="row9 odd">
-      <td class="col1"><div>Concurrent users</span></div></td>
+    <tr class="row10 even">
+      <td class="col1"><div>Concurrent users</div></td>
       <td class="col2"><div>1</div></td>
       <td class="col3"><div>1</div></td>
       <td class="col4"><div>1</div></td>
-      <td class="col5"><div>10</div></td>
+      <td class="col5"><div>10, 20, 30</div></td>
     </tr>
-    <tr class="row10 even">
-      <td class="col1"><div>&nbsp;</span></div></td>
+    <tr class="row-last odd">
+      <td class="col1"><div>&nbsp;</div></td>
       <td class="col2"><div><a href="#">sign up</a></div></td>
       <td class="col3"><div><a href="#">sign up</a></div></td>
       <td class="col4"><div><a href="#">sign up</a></div></td>
@@ -568,7 +575,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
 
     // Miramos si se ha de filtrar por paises
     $country_filter = get_global_filter_countries_select();
-      //dsm($country_filter);
+    //dsm($country_filter);
     if(!empty($country_filter)) {
       //$view->header[]
 
@@ -591,8 +598,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
     }
   } // species_table_by_family
 
-  // Aqui Filtramos:
-  //  - la view que proporciona una lista de checkboxes de species para el campo "Species Bulk add" del formulario de Checklist
+  // Aqui Filtramos la view que proporciona una lista de checkboxes de species para el campo "Species Bulk add" del formulario de Checklist
   if ($view->name == 'checklist_my_sp') {
 
     $country_filter = get_global_filter_countries_select();
@@ -664,8 +670,6 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
     } // if - no hay else, si no tenemos paises activados en el filtro, no se filtra.
   }  // taxo-tree3 & my_list
 
-
-
   // filter the taxonomy/term page for country checklists. The views shows all species, here we limit them using bird_countries.
   if ($view->name == 'country_term_page') {
 
@@ -713,11 +717,10 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
         } //is_numeric, we have the tid of the country
   } // end of country pages - views taxonomy/term, rewritten by vid/7 which is the country vocabulary.
 
-
-
   // Definir style de les figures + filtro de countries por paises, si hay algunos seleccionados..
-  if ( (($view->name == 'galley_fluid') && ($view->current_display == 'page' || $view->current_display == 'page_1')) ||
-  (($view->name == 'plate') && ($view->current_display == 'page' || $view->current_display == 'page_1' || $view->current_display == 'page_2')) ){
+  /*if ( (($view->name == 'galley_fluid') && ($view->current_display == 'page' || $view->current_display == 'page_1')) ||
+  (($view->name == 'plate') && ($view->current_display == 'page' || $view->current_display == 'page_1' || $view->current_display == 'page_2')) ){*/
+  if ($view->name == 'galley_fluid'){
 
     if(isset($view->exposed_raw_input['image_style']) && $view->exposed_raw_input['image_style'] != 'All') {
       $view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'];
@@ -755,6 +758,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
                  );
 
     }
+    
   }  // galley_fluid - plates filtradas!
 
 } // views_query_alter
@@ -845,6 +849,18 @@ function bird_taxonomies_plates_modes() {
                'p' => t('Scaled'),
              );
 }
+
+function bird_taxonomies_plates_viewstyle() {
+ return array( '0' => t('Plate view'),
+               '1' => t('List view'),
+             );
+}
+/*
+function bird_taxonomies_plates_figures() {
+ return array( '0' => t('All'),
+               '1' => t('1 per species'),
+             );
+}*/
 
 /**
  * Implentation of HOO_views_api()

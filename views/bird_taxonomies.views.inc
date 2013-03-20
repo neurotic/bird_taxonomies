@@ -52,6 +52,15 @@ function bird_taxonomies_views_data(){
       'handler' => 'views_handler_filter_image_style',
     ),
   );
+  
+  // Plate style
+  $data['bird_taxonomies']['l'] = array(
+    'title' => t('Plate style'),
+    'help' => t('Choose the plate style: normal or list'),
+    'filter' => array(
+      'handler' => 'views_handler_filter_l',
+    ),
+  );
 
   
   return $data;
