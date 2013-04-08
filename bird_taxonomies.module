@@ -533,6 +533,10 @@ function get_global_filter_countries_select2() {
     }
     else {
       $country_filter2 = false;
+      // Definir la variable de session quan l'usuari arriba al node Checklist sense haber editat el node abans:
+      /*if (isset($node) && $node->type == 'locality') { // node form o node display
+        $_SESSION['hbw_action']['checklist_nid'] = $node->field_myr_country['und'][0]['target_id']; // ja definida linia 155 de node--locality.tpl.php, pero es crea quan es visita el full node...massa tard per filtrar la view set-record
+      }*/
     }
 
     return $country_filter2;
