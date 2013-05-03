@@ -62,6 +62,14 @@ function bird_taxonomies_views_data(){
     ),
   );
 
+  // Country status
+  $data['bird_taxonomies']['country_status'] = array(
+    'title' => t('Country status'),
+    'help' => t('Country status for the species'),
+    'filter' => array(
+      'handler' => 'views_handler_filter_country_status',
+    ),
+  );
   
   return $data;
 }

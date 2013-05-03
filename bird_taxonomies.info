@@ -9,3 +9,4 @@ files[] = views/bird_taxonomies.views.inc
 files[] = views/views_handler_filter_image_style.inc
 files[] = views/views_handler_filter_image_mode.inc
 files[] = views/views_handler_filter_l.inc
+files[] = views/views_handler_filter_country_status.inc

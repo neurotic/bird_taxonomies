@@ -274,8 +274,7 @@ ORDER BY node_title DESC",array(':specie' => $specie));
 function bird_taxonomies_get_species_family_group() {
 
     $query = "SELECT node.title AS node_title, node.nid AS nid, field_data_field_sp_family_nr.field_sp_family_nr_nid AS family_nid
-FROM
-{node} node
+FROM {node} node
 LEFT JOIN {field_data_field_sp_family_nr} field_data_field_sp_family_nr ON node.nid = field_data_field_sp_family_nr.entity_id AND (field_data_field_sp_family_nr.entity_type = 'node' AND field_data_field_sp_family_nr.deleted = '0')
 LEFT JOIN {node} node_field_data_field_sp_family_nr ON field_data_field_sp_family_nr.field_sp_family_nr_nid = node_field_data_field_sp_family_nr.nid";
 //dsm('we are in line 273, function bird_taxonomies_get_species_family_group()');
@@ -284,10 +283,7 @@ LEFT JOIN {node} node_field_data_field_sp_family_nr ON field_data_field_sp_famil
   }
 
   $query .= " WHERE (( (node.status = '1') AND (node.type IN  ('species'))";
-
-
   $query .= " )) ORDER BY node_title DESC";
-
   //dsm($query);
 
   $result = db_query($query);
@@ -300,7 +296,7 @@ LEFT JOIN {node} node_field_data_field_sp_family_nr ON field_data_field_sp_famil
     /*$species[$record->node_field_data_field_fam_order_nid ][$record->nid] = array( 'data' => l($record->node_title,'node/'.$record->nid),
       'class' => array('families'));
       */
-      $species[$record->family_nid][$record->nid] = $record;
+    $species[$record->family_nid][$record->nid] = $record;
   }
 
   return $species;
@@ -673,51 +669,6 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
     }
   } // species_table_by_family
 
-  // Aqui Filtramos la view que proporciona una lista de checkboxes de species para el campo "Species Bulk add" del formulario de Checklist
-  if ($view->name == 'checklist_my_sp') {
-
-    $country_filter = get_global_filter_countries_select();
-    if(!empty($country_filter)) {
-      //$view->header[]
-
-      $result = db_query($country_filter);
-
-      $nids = array();
-      foreach ($result as $record) {
-          $nids[] = $record->nid_hbw;
-      }
-
-      $view->query->where[] =
-            array( 'type' => 'AND',
-                   'conditions' => array( 0 => array( 'field'    => 'node.nid',
-                                                      'operator' => 'in',
-                                                      'value'    => $nids,
-                                                    ),
-                                        ),
-                   'args' => array(),
-                 );
-    }
-    else {
-      $result = db_query($country_filter);
-
-      $nids = array();
-      foreach ($result as $record) {
-          $nids[] = $record->nid_hbw;
-      }
-
-      $view->query->where[] =
-            // dummy query to obtain empty result, so any checkbox will be shown in the Checklist form
-            array( 'type' => 'AND',
-                   'conditions' => array( 0 => array( 'field'    => 'node.nid',
-                                                      'operator' => 'in',
-                                                      'value'    => 9999999999999999999999,
-                                                    ),
-                                        ),
-                   'args' => array(),
-                 );
-    }
-  } // checklist_my_sp
-
   // filtrem les views de species list a la pag de familia + la pagina my-list
   if ( ($view->name == 'taxo_tree3') || ($view->name == 'my_list') ){
     // Miramos si se ha de filtrar por paises
@@ -747,70 +698,116 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
 
   // filter the taxonomy/term page for country checklists. The views shows all species, here we limit them using bird_countries.
   if ($view->name == 'country_term_page') {
+    //drupal_set_message('arg0: ' . arg(0) . ' arg1: ' . arg(1) . ' arg2: ' . arg(2) . '<br />$view->args[0]: ' . $view->args['0'], $repeat = FALSE);
+    if(is_numeric($view->args['0'])) {
+      // filtrar per Status (endemic,...)
+      if(!empty($_GET['country_status'])) {
+        switch($_GET['country_status']) {
+          case 'All':
+          $result = db_query("SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw = :tid_country",array(':tid_country' => $view->args['0']));
+          break;
+          // 1 (Regular) = 1 + 2 + 6
+          case '1':
+          $result = db_query("SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw = :tid_country AND bd.status IN(1,2,6)",array(':tid_country' => $view->args['0']));
+          break;
+          // 7 'Vagrant+Introduced' => 3
+          case '3':
+          $result = db_query("SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw = :tid_country AND bd.status IN(3,7)",array(':tid_country' => $view->args['0']));
+          break;
+          // 6 'Regular+Introduced' => 4
+          // 7 'Vagrant+Introduced' => 4
+          case '4':
+          $result = db_query("SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw = :tid_country AND bd.status IN(4,6,7)",array(':tid_country' => $view->args['0']));
+          break;
+          default:
+          $result = db_query("SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw = :tid_country AND bd.status = :country_status",array(':tid_country' => $view->args['0'], ':country_status' => $_GET['country_status']));
+        }
+      }
+      else {
+        $result = db_query("SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw = :tid_country",array(':tid_country' => $view->args['0']));
+      }
+        
+        $nids = array();
+        foreach ($result as $record) {
+          $nids[] = $record->nid_hbw;
+        }
 
-        if(is_numeric($view->args['0'])) {
-            $result = db_query("SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw = :tid_country",array(':tid_country' => $view->args['0']));
+        $view->query->where[] =
+            array( 'type' => 'AND',
+                   'conditions' => array( 0 => array( 'field'    => 'node.nid',
+                                                      'operator' => 'in',
+                                                      'value'    => $nids,
+                                                    ),
+                                        ),
+                   'args' => array(),
+                 );
 
-            $nids = array();
-            foreach ($result as $record) {
-              $nids[] = $record->nid_hbw;
-            }
+         // CODI per evitar tenir un camp views php a la view!!!!!
+        // let's add bird_countries table to show the status (Vagrant, ...) without the need of having a 'PHP views field'   with the query on it.
+        /*
+        $view->query->tables['bird_countries'] =
+            array('tid_hbw' => array ('count' => '1',
+                                    'alias' => 'bird_countries_tid_hbw'),
+                'nid_hbw' => array ('count' => '1',
+                                    'alias' => 'bird_countries_nid_hbw'),
+                'status' => array ('count' => '1',
+                                    'alias' => 'bird_countries_status'),
+                );
 
-            $view->query->where[] =
-                array( 'type' => 'AND',
-                       'conditions' => array( 0 => array( 'field'    => 'node.nid',
-                                                          'operator' => 'in',
-                                                          'value'    => $nids,
-                                                        ),
-                                            ),
-                       'args' => array(),
-                     );
-
-             // CODI per evitar tenir un camp views php a la view!!!!!
-            // let's add bird_countries table to show the status (Vagrant, ...) without the need of having a 'PHP views field'   with the query on it.
-            /*
-            $view->query->tables['bird_countries'] =
-                array('tid_hbw' => array ('count' => '1',
-                                        'alias' => 'bird_countries_tid_hbw'),
-                    'nid_hbw' => array ('count' => '1',
-                                        'alias' => 'bird_countries_nid_hbw'),
-                    'status' => array ('count' => '1',
-                                        'alias' => 'bird_countries_status'),
-                    );
-
-            // NO FUNCIONA!!! node.nid NO ES TRANSFORMA EN EL VALOR DEL nid d'un ESPECIE...
-            $view->query->where[] =
-                array( 'type' => 'AND',
-                       'conditions' => array( 0 => array( 'field'    => 'bird_countries_nid_hbw.nid_hbw',
-                                                          'operator' => 'in',
-                                                          'value'    => 'node.nid',
-                                                        ),
-                                            ),
-                       'args' => array(),
-                     );
-           */
-        } //is_numeric, we have the tid of the country
+        // NO FUNCIONA!!! node.nid NO ES TRANSFORMA EN EL VALOR DEL nid d'un ESPECIE...
+        $view->query->where[] =
+            array( 'type' => 'AND',
+                   'conditions' => array( 0 => array( 'field'    => 'bird_countries_nid_hbw.nid_hbw',
+                                                      'operator' => 'in',
+                                                      'value'    => 'node.nid',
+                                                    ),
+                                        ),
+                   'args' => array(),
+                 );
+       */
+    } //is_numeric, we have the tid of the country
   } // end of country pages - views taxonomy/term, rewritten by vid/7 which is the country vocabulary.
 
-  // Definir style de les figures + filtro de countries por paises, si hay algunos seleccionados..
-  /*if ( (($view->name == 'galley_fluid') && ($view->current_display == 'page' || $view->current_display == 'page_1')) ||
-  (($view->name == 'plate') && ($view->current_display == 'page' || $view->current_display == 'page_1' || $view->current_display == 'page_2')) ){*/
   if ($view->name == 'galley_fluid'){
+    
+    // check if the size is set to AUTO, or not even set, then check if there are families, genus or species selected and find the best size
+    if($view->exposed_raw_input['image_style']=='auto') {
+      if($view->exposed_raw_input['image_mode']!='a') { // figures a escala
+          //default value for the style - it will be overwritted with new values if we find families or any other filter
+          $view->field['field_figure_img']->options['settings']['image_style'] = 'medium'. "_" . $view->exposed_raw_input['image_mode'];
+          
+          // 1. ORDERS selected
+          
+          // 2. FAMILIES selected
+          if(!empty($view->exposed_raw_input['fam'])){
+            $fam_nids = implode(',',$view->exposed_raw_input['fam']);
+            $fam_min_avg = 0;
+            //$fam_max_avg = 0;
 
-    if(isset($view->exposed_raw_input['image_style']) && $view->exposed_raw_input['image_style'] != 'All') {
-      $view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'];
-    }
-    else {
-      $view->field['field_figure_img']->options['settings']['image_style'] = array_shift(array_keys(bird_taxonomies_plates_styles()));
-    }
+            $result = db_query("SELECT max.entity_id as nid,max.field_fam_max_size_value as max, min.field_fam_min_size_value as min FROM field_data_field_fam_max_size max, field_data_field_fam_min_size min where min.entity_id=max.entity_id and min.entity_id in ($fam_nids)");
 
-    if(isset($view->exposed_raw_input['image_mode']) && $view->exposed_raw_input['image_mode'] != 'All') {
-      $view->field['field_figure_img']->options['settings']['image_style'] .= "_" . $view->exposed_raw_input['image_mode'];
-    }
-    else {
-      $view->field['field_figure_img']->options['settings']['image_style'] .= "_" . array_shift(array_keys(bird_taxonomies_plates_modes()));
-    }
+            foreach ($result as $record) {
+                $fam_min_avg += $record->min;
+                //$fam_max_avg += $record->max; // only using the min size for now.
+            }
 
+            $view->field['field_figure_img']->options['settings']['image_style'] = calcula_style_size($fam_min_avg/count($view->exposed_raw_input['fam']));
+
+          } // end families
+              
+          // 3. GENUS selected
+          
+          // 4. COMMON NAME species selected
+          
+      } // != a
+      else { // tenim tamany absolut, i estil auto, no escollit, per tant fem medium i ja està...
+        $view->field['field_figure_img']->options['settings']['image_style'] = 'medium_a';
+      }
+    } // end 'auto'
+    else { // no han escollit 'auto'
+      $view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'] . "_" . $view->exposed_raw_input['image_mode'];
+    }
+    
     //($view->field['field_figure_img']->options['settings']['image_style']);
     $country_filter = get_global_filter_countries_select();
 
@@ -837,6 +834,15 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
   }  // galley_fluid - plates filtradas!
 
 } // views_query_alter
+
+
+function bird_taxonomies_views_post_render(&$view, &$output, &$cache) {
+  // replace the original image url for the colorbox style.
+  if ($view->name == 'galley_fluid') {
+    $output = str_replace('/files/figures/','/files/styles/colorbox-plate/public/figures/',$output);
+  }
+}
+
 
 // este hook para que se usa???
 function bird_taxonomies_form_global_filter_1_alter(&$form, &$form_state, $form_id) {
@@ -911,7 +917,8 @@ function bird_taxonomies_form_alter(&$form, &$form_state, $form_id) {
 */
 
 function bird_taxonomies_plates_styles() {
- return array( 'tiny' => t('Tiny'),
+ return array( 'auto' => t('AUTO'),
+               'tiny' => t('Tiny'),
                'small' => t('Small'),
                'medium' => t('Medium'),
                'large' => t('Large'),
@@ -936,6 +943,18 @@ function bird_taxonomies_plates_figures() {
                '1' => t('1 per species'),
              );
 }*/
+
+function bird_taxonomies_country_status() {
+ return array( 'All' => t('All'),
+               '1' => t('Regular'), 
+               '2' => t('Endemic'), 
+               '3' => t('Vagrant'), 
+               '4' => t('Introduced'), 
+               //'5' => t('Escaped'), 
+               //'6' => t('Regular+Introduced'), 
+               //'7' => t('Vagrant+Introduced'), // no interessa mostrar aquestos
+             );
+}
 
 /**
  * Implentation of HOO_views_api()
