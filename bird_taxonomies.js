@@ -1,6 +1,18 @@
 jQuery(document).ready(function($) {
 
-
+      $('#edit-search-block-form--2').attr('value','Enter your keyword(s)').addClass('default-keywords');
+      $('#edit-search-block-form--2').focusin(function() {
+          if ( this.value == 'Enter your keyword(s)' ) {
+            //this.removeClass('default-keywords');
+            this.value = '';
+          }
+      }).focusout(function() {
+          if ( this.value == '' ) {
+            //this.addClass('default-keywords');
+            this.value = 'Enter your keyword(s)';
+          }
+      });
+      
       if($('#block-bird-taxonomies-bird-orders h2 span.plus').length == 0) {
         if($('#block-bird-taxonomies-bird-orders .content').is(':visible')) {
           $('#block-bird-taxonomies-bird-orders h2').append('<span class="plus">-</span>');
@@ -112,4 +124,57 @@ jQuery(document).ready(function($) {
 		    return false;
     	});
 
+      
+      /**
+       * Si la familia tiene muchas especies, el contenedor mide mas de 350px de alto, por lo que se forma un scroll.
+       * En estos casos, hay que mostrar la especie activa al principio de este scroll
+       */
+      // elemento que queremos mostrar en el scroll
+      var active_s = $('#region-sidebar-first .families .item-list ul.species > li.selected .a-wrapper');
+      // Averiguar si el elemento está presente en la página (si no averiguamos, provoca un error de que .top es NULL)
+      if (active_s.length > 0){
+        // distancia desde top hasta especie activa
+        var offset_s = active_s.offset().top - $(window).scrollTop();
+        // distancia desde top hasta familia activa
+        var offset_f = $('#region-sidebar-first ul .families > li.selected .a-wrapper').offset().top;
+        //console.log('active_s: ' + active_s + ' / offset_s: ' + offset_s + ' / offset_f: ' + offset_f);
+        
+        if (offset_s > window.innerHeight) {
+            $('#region-sidebar-first ul.species').animate({
+                scrollTop: offset_s - offset_f - 66 // 66 per veure també la sp anterior
+            }, 1000);
+            return false;
+        }
+      }
+      
+      /**
+       * Idem per Geographical tree
+       */
+      var active_s2 = $('#region-sidebar-first section#block-menu-menu-geographical-tree ul.menu ul.menu ul.menu li.active-trail');
+      if (active_s2.length > 0){
+        var offset_s2 = active_s2.offset().top - $(window).scrollTop();
+        var offset_f2 = $('#region-sidebar-first section#block-menu-menu-geographical-tree ul.menu ul.menu li.active-trail').offset().top;
+        //console.log('active_s2: ' + active_s2 + ' / offset_s2: ' + offset_s2 + ' / offset_f2: ' + offset_f2);
+        
+        if (offset_s2 > window.innerHeight) {
+            $('#region-sidebar-first section#block-menu-menu-geographical-tree ul.menu ul.menu ul.menu').animate({
+                scrollTop: offset_s2 - offset_f2 - 66
+            }, 1000);
+            return false;
+        }
+      }
+
 });
+
+/**
+ * Geographical tree
+ */
+(function ($) {
+  $(window).load(function() {
+    // estat del tree al carregar-se: expanded
+    $('#region-sidebar-first section#block-menu-menu-geographical-tree li.first.last.dhtml-menu > ul.menu').css('display', 'block !important');
+    // Esborrar el "R" de "R World" del Geographical tree
+    $('#dhtml_menu-11337 > a').text('World')
+    //$('#region-sidebar-first section#block-menu-menu-geographical-tree ul.menu > li.first > ul.menu > li.first > a').text('World')
+  });
+})(jQuery);
