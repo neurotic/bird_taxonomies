@@ -12,7 +12,7 @@ jQuery(document).ready(function($) {
             this.value = 'Enter your keyword(s)';
           }
       });
-      
+
       if($('#block-bird-taxonomies-bird-orders h2 span.plus').length == 0) {
         if($('#block-bird-taxonomies-bird-orders .content').is(':visible')) {
           $('#block-bird-taxonomies-bird-orders h2').append('<span class="plus">-</span>');
@@ -47,16 +47,22 @@ jQuery(document).ready(function($) {
          // Miramos si ya esta puesto y sino lo obteneos
          if($(family).parent().parent().children('.container').length == 0) {
           if($('#overlay').length == 0) {
-            $('body').prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>');
+            //$('.block-bird-taxonomies .content').prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>');
           }
           jQuery.ajax({
             type: 'POST',
             url: Drupal.settings.basePath + 'bird_taxonomies/ajax/species/' + family_id + '/' + nid_url,
             beforeSend: function(){
+              //console.log(this);
+
+              $('#id-' + family_id).prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>');
+              var height = $('#id-' + family_id + ' > .a-wrapper').height();
+              $('#overlay').css('height', height);
+              //console.log(height);
               $("#overlay").show();
             },
             complete: function(){
-              $("#overlay").hide();
+              $("#overlay").remove();
             },
             dataType: 'html',
             cache: false,
@@ -124,7 +130,7 @@ jQuery(document).ready(function($) {
 		    return false;
     	});
 
-      
+
       /**
        * Si la familia tiene muchas especies, el contenedor mide mas de 350px de alto, por lo que se forma un scroll.
        * En estos casos, hay que mostrar la especie activa al principio de este scroll
@@ -138,7 +144,7 @@ jQuery(document).ready(function($) {
         // distancia desde top hasta familia activa
         var offset_f = $('#region-sidebar-first ul .families > li.selected .a-wrapper').offset().top;
         //console.log('active_s: ' + active_s + ' / offset_s: ' + offset_s + ' / offset_f: ' + offset_f);
-        
+
         if (offset_s > window.innerHeight) {
             $('#region-sidebar-first ul.species').animate({
                 scrollTop: offset_s - offset_f - 66 // 66 per veure també la sp anterior
@@ -146,7 +152,7 @@ jQuery(document).ready(function($) {
             return false;
         }
       }
-      
+
       /**
        * Idem per Geographical tree
        */
@@ -155,7 +161,7 @@ jQuery(document).ready(function($) {
         var offset_s2 = active_s2.offset().top - $(window).scrollTop();
         var offset_f2 = $('#region-sidebar-first section#block-menu-menu-geographical-tree ul.menu ul.menu li.active-trail').offset().top;
         //console.log('active_s2: ' + active_s2 + ' / offset_s2: ' + offset_s2 + ' / offset_f2: ' + offset_f2);
-        
+
         if (offset_s2 > window.innerHeight) {
             $('#region-sidebar-first section#block-menu-menu-geographical-tree ul.menu ul.menu ul.menu').animate({
                 scrollTop: offset_s2 - offset_f2 - 66
