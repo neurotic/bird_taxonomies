@@ -869,8 +869,6 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
 
     $image_mode = 'a';
 
-    dsm($view->exposed_raw_input['image_mode']);
-
     if($view->exposed_raw_input['image_mode'] == 0) {
       $image_mode = 'a';
     }
