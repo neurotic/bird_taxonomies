@@ -866,10 +866,24 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
   if ($view->name == 'galley_fluid'){
 
     // check if the size is set to AUTO, or not even set, then check if there are families, genus or species selected and find the best size
+
+    $image_mode = 'a';
+
+    dsm($view->exposed_raw_input['image_mode']);
+
+    if($view->exposed_raw_input['image_mode'] == 0) {
+      $image_mode = 'a';
+    }
+
+    if($view->exposed_raw_input['image_mode'] == 1) {
+      $image_mode = 'p';
+    }
+
     if($view->exposed_raw_input['image_style']=='auto') {
-      if($view->exposed_raw_input['image_mode']!='a') { // figures a escala
+      if($image_mode!='a') { // figures a escala
           //default value for the style - it will be overwritted with new values if we find families or any other filter
-          $view->field['field_figure_img']->options['settings']['image_style'] = 'medium'. "_" . $view->exposed_raw_input['image_mode'];
+          $view->field['field_figure_img']->options['settings']['image_style'] = 'medium'. "_" . $image_mode;
+
 
           // 1. ORDERS selected
 
@@ -900,7 +914,7 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
       }
     } // end 'auto'
     else { // no han escollit 'auto'
-      $view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'] . "_" . $view->exposed_raw_input['image_mode'];
+      $view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'] . "_" .  $image_mode;
     }
 
     //($view->field['field_figure_img']->options['settings']['image_style']);
