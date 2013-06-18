@@ -323,13 +323,15 @@ function theme_bird_taxonomies_bird_orders($variables) {
 
   $output = '';
 
+//   si eliminem aquest troç de codi definitivament, eliminar també el block http://alive.hbw.com/admin/structure/block/manage/block/28/configure !!!!
   // block visibility controled from here, not on the block page - do not show for /species/search and or /species/home
-  $url_composed = arg(0).'/'.arg(1);
-  if (($url_composed != ('node/202110')) && ($url_composed != ('species/search'))){
-    $block = block_load('block', 28);
+//  $url_composed = arg(0).'/'.arg(1);
+//  if (($url_composed != ('node/202110')) && ($url_composed != ('species/search'))){
+//    $block = block_load('block', 28);
     //$output .= '<div class="label">Search on Common mame</div>' . drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
-    $output .= drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
-  }
+//    $output .= drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
+//  }
+$output .= '';
 
   $output .= theme('item_list', array('items' => $orders, 'attributes' => array ('class' => 'orders clearfix')));
 
@@ -413,86 +415,76 @@ function theme_bird_taxonomies_prices_table($variables) {
   <thead>
     <tr class="row1 odd">
       <th class="col1"><div>&nbsp;</div></th>
-      <th class="col2"><div>registered</div></th>
-      <th class="col3"><div>basic</div></th>
-      <th class="col4"><div>supporting</div></th>
-      <th class="col5"><div>institutional</div></th>
+      <th class="col2"><div>basic</div></th>
+      <th class="col3"><div>supporting</div></th>
+      <th class="col4"><div>institutional</div></th>
     </tr>
   </thead>
   <tbody>
     <tr class="row2 even">
       <td class="col1"><div>Species accounts</div></td>
-      <td class="col2"><div>25</div></td>
+      <td class="col2"><div>all</div></td>
       <td class="col3"><div>all</div></td>
       <td class="col4"><div>all</div></td>
-      <td class="col5"><div>all</div></td>
     </tr>
     <tr class="row3 odd">
-      <td class="col1"><div>Family accounts</div></td>
-      <td class="col2"><div>1</div></td>
+      <td class="col1"><div>Family texts</div></td>
+      <td class="col2"><div>all</div></td>
       <td class="col3"><div>all</div></td>
       <td class="col4"><div>all</div></td>
-      <td class="col5"><div>all</div></td>
     </tr>
     <tr class="row4 even">
-      <td class="col1"><div>Birdlists</div></td>
-      <td class="col2"><div class="false"><span>false</span></div></td>
-      <td class="col3"><div>unlimited</div></td>
-      <td class="col4"><div>unlimited</div></td>
-      <td class="col5"><div>unlimited</div></td>
+      <td class="col1"><div>Plates and figures</div></td>
+      <td class="col2"><div>all</div></td>
+      <td class="col3"><div>all</div></td>
+      <td class="col4"><div>all</div></td>
     </tr>
     <tr class="row5 odd">
       <td class="col1"><div>Newsletters</div></td>
       <td class="col2"><div class="true"><span>true</span></div></td>
       <td class="col3"><div class="true"><span>true</span></div></td>
-      <td class="col4"><div class="true"><span>true</span></div></td>
-      <td class="col5"><div class="false"><span>false</span></div></td>
+      <td class="col4"><div class="false"><span>false</span></div></td>
     </tr>
     <tr class="row6 even">
       <td class="col1"><div>Get access to all the contents</div></td>
-      <td class="col2"><div class="false"><span>false</span></div></td>
+      <td class="col2"><div class="true"><span>true</span></div></td>
       <td class="col3"><div class="true"><span>true</span></div></td>
       <td class="col4"><div class="true"><span>true</span></div></td>
-      <td class="col5"><div class="true"><span>true</span></div></td>
     </tr>
     <tr class="row7 odd">
       <td class="col1"><div>Create wikicontributions</div></td>
       <td class="col2"><div class="true"><span>true</span></div></td>
       <td class="col3"><div class="true"><span>true</span></div></td>
       <td class="col4"><div class="true"><span>true</span></div></td>
-      <td class="col5"><div class="false"><span>false</span></div></td>
     </tr>
     <tr class="row8 even">
       <td class="col1"><div>Control of personal observations</div></td>
       <td class="col2"><div class="false"><span>false</span></div></td>
-      <td class="col3"><div class="false"><span>false</span></div></td>
-      <td class="col4"><div class="true"><span>true</span></div></td>
-      <td class="col5"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div class="true"><span>true</span></div></td>
+      <td class="col4"><div class="false"><span>false</span></div></td>
     </tr>
-    
+
     <tr class="row9 odd">
       <td class="col1"><div>Complete control of referenced literature</div></td>
       <td class="col2"><div class="false"><span>false</span></div></td>
-      <td class="col3"><div class="false"><span>false</span></div></td>
+      <td class="col3"><div class="true"><span>true</span></div></td>
       <td class="col4"><div class="true"><span>true</span></div></td>
-      <td class="col5"><div class="true"><span>true</span></div></td>
     </tr>
     <tr class="row10 even">
       <td class="col1"><div>Concurrent users</div></td>
       <td class="col2"><div>1</div></td>
       <td class="col3"><div>1</div></td>
-      <td class="col4"><div>1</div></td>
-      <td class="col5"><div>10, 20, 30</div></td>
+      <td class="col4"><div>10</div></td>
     </tr>
     <tr class="row-last odd">
       <td class="col1"><div>&nbsp;</div></td>
       <td class="col2"><div><a href="#">sign up</a></div></td>
       <td class="col3"><div><a href="#">sign up</a></div></td>
       <td class="col4"><div><a href="#">sign up</a></div></td>
-      <td class="col5"><div><a href="#">sign up</a></div></td>
     </tr>
   </tbody>
-</table>';
+</table>
+<div class="free">or <a class="btn" href="/pricing">Sign up for free</a></div>';
 
   return $output;
 }
@@ -584,7 +576,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
   // node ID instead of node title.
 
   // View incrustada en un node Checklist. Mostrar les sp del pais seleccionat + excluir les sp ja marcades en el node checklist
-  if ($view->name == 'set_records') {
+/*  if ($view->name == 'set_records') {
     $country_filter2 = get_global_filter_countries_select2();
     if(!empty($country_filter2)) {
 
@@ -594,7 +586,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
       foreach ($result as $record) {
           $nids[] = $record->nid_hbw;
       }
-      
+
       // recuperar les sp ja afegides al checklist
       $nids_checklist = 'SELECT field_data_field_myr_sp.field_myr_sp_target_id
 FROM field_data_field_myr_sp, field_data_field_loc_sp
@@ -634,13 +626,63 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
                    );
       }
     }
+  }*/
+
+  // no ho fem amb un global filter 2, sino agafant en la url el arg del country del node Checklist que s'està veient. Si no funciona, agafar el nid del checklist de la url, i fer la consulta a la bbdd de quin pais es.
+  if ($view->name == 'set_records') {
+    //print get_global_filter_countries_select(); ==> SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw IN (4263, 4269, 4449, 4475, 4479, 4498, 4509, 4514, 4517, 4518, 4519, 4521, 4523, 4526, 4527, 4528, 4534, 4537, 4538, 4541, 4542, 4543, 4545, 4546, 4547, 4549, 4551, 4554)
+    //$country_filter2 = $_GET['field_myr_country'];
+    $arg_record_1 = arg(1);
+
+    //$country_filter2 = 'SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw IN ('.$arg_record_1.')';
+    $country_filter2 = 'SELECT distinct(bd.nid_hbw) FROM {bird_countries} as bd WHERE bd.tid_hbw IN (SELECT field_myr_country_target_id FROM {field_data_field_myr_country} WHERE entity_id IN (' .$arg_record_1.'))';
+
+    //$country_filter2 = '4517';
+    if(!empty($country_filter2)) {
+
+      $result = db_query($country_filter2);
+
+      $nids = array();
+      foreach ($result as $record) {
+          $nids[] = $record->nid_hbw;
+      }
+
+      $view->query->where[] =
+            array( 'type' => 'AND',
+                   'conditions' => array( 0 => array( 'field'    => 'node.nid',
+                                                      'operator' => 'in',
+                                                      'value'    => $nids,
+                                                    ),
+                                        ),
+                   'args' => array(),
+                 );
+    }
   }
 
   // Aqui Filtramos:
   //  - la tabla de las sp en los nodes Family
   //  - la view que determina el orden de las sp en la slidebox
   //  - la view per atribuir uns records a un checklist
-  
+
+  // Modificacions en la llista de països del bloc Global Filter 1
+  // De moment excluem els estats de EEUU i Canada. Mexic pendent
+  if ($view->name == 'taxo_paisos') {
+
+    // EEUU: 4251. Estats: 4294, 4313, 4321, 4327, 4328, 4332, 4337, 4338, 4341, 4347, 4351, 4352, 4353, 4354, 4356, 4363, 4364, 4365, 4368, 4372, 4373, 4375, 4377, 4378, 4379, 4380, 4381, 4382, 4383, 4385, 4388, 4389, 4390, 4391, 4393, 4397, 4398, 4400, 4401, 4402, 4410, 4413, 4414, 4418, 4420, 4445, 4447, 4462, 4463
+    // Canada: 4284. Estats: 4334, 4340, 4357, 4367, 4394, 4405, 4421, 4428, 4429, 4461, 4465, 4477, 4484
+    // Mexico (Northern): 4264, Mexico (Southern): 4254 => no fem res de moment
+    $tids = array(4294, 4313, 4321, 4327, 4328, 4332, 4337, 4338, 4341, 4347, 4351, 4352, 4353, 4354, 4356, 4363, 4364, 4365, 4368, 4372, 4373, 4375, 4377, 4378, 4379, 4380, 4381, 4382, 4383, 4385, 4388, 4389, 4390, 4391, 4393, 4397, 4398, 4400, 4401, 4402, 4410, 4413, 4414, 4418, 4420, 4445, 4447, 4462, 4463, 4334, 4340, 4357, 4367, 4394, 4405, 4421, 4428, 4429, 4461, 4465, 4477, 4484);
+    $view->query->where[] =
+      array( 'type' => 'AND',
+             'conditions' => array( 0 => array( 'field'    => 'taxonomy_term_data.tid',
+                                                'operator' => 'not in',
+                                                'value'    => $tids,
+                                              ),
+                                  ),
+             'args' => array(),
+           );
+  }
+
   //if ( ($view->name == 'species_table_by_family') || ($view->name == 'slidebox') || ($view->name == 'set_records') ) {
   if ( ($view->name == 'species_table_by_family') || ($view->name == 'slidebox') ) {
 
@@ -668,6 +710,31 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
                  );
     }
   } // species_table_by_family
+
+  if ($view->name == 'family_index') {
+
+    $country_filter = get_global_filter_countries_select();
+    //dsm($country_filter);
+    if(!empty($country_filter)) {
+
+      $result = db_query($country_filter);
+
+      $nids = array();
+      foreach ($result as $record) {
+          $nids[] = $record->nid_hbw;
+      }
+
+      $view->query->where[] =
+            array( 'type' => 'AND',
+                   'conditions' => array( 0 => array( 'field'    => 'field_data_field_figure_sp.field_figure_sp_nid',
+                                                      'operator' => 'in',
+                                                      'value'    => $nids,
+                                                    ),
+                                        ),
+                   'args' => array(),
+                 );
+    }
+  } // family_index
 
   // filtrem les views de species list a la pag de familia + la pagina my-list
   if ( ($view->name == 'taxo_tree3') || ($view->name == 'my_list') ){
@@ -726,7 +793,7 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
       else {
         $result = db_query("SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw = :tid_country",array(':tid_country' => $view->args['0']));
       }
-        
+
         $nids = array();
         foreach ($result as $record) {
           $nids[] = $record->nid_hbw;
@@ -768,16 +835,44 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
     } //is_numeric, we have the tid of the country
   } // end of country pages - views taxonomy/term, rewritten by vid/7 which is the country vocabulary.
 
+  // Checked species (bloc en la pàgina d'un pais)
+  if ($view->name == 'species_table_by_family' && $view->current_display == 'block_2') {
+    $arg2 = arg(2);
+    // Miramos si se ha de filtrar por paises
+    $country_tid = 'SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw IN ('.$arg2.')';
+
+    if(!empty($country_tid)) {
+
+      $result = db_query($country_tid);
+
+      $nids = array();
+      foreach ($result as $record) {
+          $nids[] = $record->nid_hbw;
+      }
+
+      $view->query->where[] =
+            array( 'type' => 'AND',
+                   'conditions' => array( 0 => array( 'field'    => 'node.nid',
+                                                      'operator' => 'in',
+                                                      'value'    => $nids,
+                                                    ),
+                                        ),
+                   'args' => array(),
+                 );
+
+    }
+  }
+
   if ($view->name == 'galley_fluid'){
-    
+
     // check if the size is set to AUTO, or not even set, then check if there are families, genus or species selected and find the best size
     if($view->exposed_raw_input['image_style']=='auto') {
       if($view->exposed_raw_input['image_mode']!='a') { // figures a escala
           //default value for the style - it will be overwritted with new values if we find families or any other filter
           $view->field['field_figure_img']->options['settings']['image_style'] = 'medium'. "_" . $view->exposed_raw_input['image_mode'];
-          
+
           // 1. ORDERS selected
-          
+
           // 2. FAMILIES selected
           if(!empty($view->exposed_raw_input['fam'])){
             $fam_nids = implode(',',$view->exposed_raw_input['fam']);
@@ -794,11 +889,11 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
             $view->field['field_figure_img']->options['settings']['image_style'] = calcula_style_size($fam_min_avg/count($view->exposed_raw_input['fam']));
 
           } // end families
-              
+
           // 3. GENUS selected
-          
+
           // 4. COMMON NAME species selected
-          
+
       } // != a
       else { // tenim tamany absolut, i estil auto, no escollit, per tant fem medium i ja està...
         $view->field['field_figure_img']->options['settings']['image_style'] = 'medium_a';
@@ -807,7 +902,7 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
     else { // no han escollit 'auto'
       $view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'] . "_" . $view->exposed_raw_input['image_mode'];
     }
-    
+
     //($view->field['field_figure_img']->options['settings']['image_style']);
     $country_filter = get_global_filter_countries_select();
 
@@ -830,7 +925,7 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
                  );
 
     }
-    
+
   }  // galley_fluid - plates filtradas!
 
 } // views_query_alter
@@ -946,12 +1041,12 @@ function bird_taxonomies_plates_figures() {
 
 function bird_taxonomies_country_status() {
  return array( 'All' => t('All'),
-               '1' => t('Regular'), 
-               '2' => t('Endemic'), 
-               '3' => t('Vagrant'), 
-               '4' => t('Introduced'), 
-               //'5' => t('Escaped'), 
-               //'6' => t('Regular+Introduced'), 
+               '1' => t('Regular'),
+               '2' => t('Endemic'),
+               '3' => t('Vagrant'),
+               '4' => t('Introduced'),
+               //'5' => t('Escaped'),
+               //'6' => t('Regular+Introduced'),
                //'7' => t('Vagrant+Introduced'), // no interessa mostrar aquestos
              );
 }
@@ -968,4 +1063,18 @@ function bird_taxonomies_views_api() {
   );
 
   return $array;
+}
+
+function bird_taxonomies_get_params() {
+  global $base_url;
+  $query = array();
+
+  $url = $base_url.request_uri();
+  $url = parse_url($url);
+
+  if(isset($url['query'])) {
+    parse_str($url['query'],$query);
+  }
+
+  return $query;
 }
