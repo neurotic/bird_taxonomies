@@ -177,10 +177,16 @@ jQuery(document).ready(function($) {
  */
 (function ($) {
   $(window).load(function() {
-    // estat del tree al carregar-se: expanded
-    $('#region-sidebar-first section#block-menu-menu-geographical-tree li.first.last.dhtml-menu > ul.menu').css('display', 'block !important');
+    // Estat del tree al carregar-se: expanded
+    $('#region-sidebar-first section#block-menu-menu-geographical-tree li.first.last.dhtml-menu > ul.menu').css('display', 'block');
     // Esborrar el "R" de "R World" del Geographical tree
     $('#dhtml_menu-11337 > a').text('World')
     //$('#region-sidebar-first section#block-menu-menu-geographical-tree ul.menu > li.first > ul.menu > li.first > a').text('World')
+    // expandre la zona clickable del icona a tot el nom
+    $('#dhtml_menu-11337 > a, #dhtml_menu-10983 > a, #dhtml_menu-11038 > a, #dhtml_menu-11048 > a, #dhtml_menu-11077 > a, #dhtml_menu-11148 > a, #dhtml_menu-11195 > a, #dhtml_menu-11223 > a').unbind('click').bind('click', function() {
+      $('a.dhtml-menu-icon', this).click();
+    });
+    // Prevent (the real) click (to taxonomy entity) on parent items (World, Afrotropical,...)
+    $('#dhtml_menu-11337 > a, #dhtml_menu-10983 > a, #dhtml_menu-11038 > a, #dhtml_menu-11048 > a, #dhtml_menu-11077 > a, #dhtml_menu-11148 > a, #dhtml_menu-11195 > a, #dhtml_menu-11223 > a').click(false);
   });
 })(jQuery);
