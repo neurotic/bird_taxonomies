@@ -201,9 +201,15 @@ ORDER BY field_data_field_fam_ordenacio.field_fam_ordenacio_value ASC");
 
 function bird_taxonomies_get_species_ajax_callback($family = NULL,$url_nid = 0) {
 
-  $species = bird_taxonomies_get_species($family);
-
-  print theme('bird_taxonomies_bird_species',array('species' => $species, 'url_nid' => $url_nid));
+  global $user;
+  // No mostramos más alla de las familias cuando el usuario no tiene uno de estos roles: Basic, Supporting, Institutional, Editor, Administrator
+  if (empty($user->roles[5]) && empty($user->roles[6]) && empty($user->roles[7]) && empty($user->roles[4]) && empty($user->roles[3])) {
+    print '<div class="avis">Only members are allowed to browse further</div>';
+  }
+  else {
+    $species = bird_taxonomies_get_species($family);
+    print theme('bird_taxonomies_bird_species',array('species' => $species, 'url_nid' => $url_nid));
+  }
   exit();
 }
 
@@ -377,10 +383,16 @@ function theme_bird_taxonomies_bird_species($variables) {
   }
   else {
     $items[] = array('data' => '<span class="a-wrapper clearfix">'. t('No species with this filter') . '</span>');
-
   }
-
-  $output = theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'species clearfix')));
+  
+  $output = '';
+  global $user;
+  if (empty($user->roles[5]) && empty($user->roles[6]) && empty($user->roles[7]) && empty($user->roles[4]) && empty($user->roles[3])) {
+    $output .= '<div class="avis">Only members are allowed to browse further</div>';
+  }
+  else {
+    $output .= theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'species clearfix')));
+  }
 
   return $output;
 }
@@ -865,7 +877,6 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
 
   if ($view->name == 'galley_fluid'){
 
-    // check if the size is set to AUTO, or not even set, then check if there are families, genus or species selected and find the best size
 
     $image_mode = 'a';
 
@@ -877,11 +888,13 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
       $image_mode = 'p';
     }
 
+    // check if the size is set to AUTO, or not even set, then check if there are families, genus or species selected and find the best size
     if($view->exposed_raw_input['image_style']=='auto') {
-      if($image_mode!='a') { // figures a escala
+      //if($view->exposed_raw_input['image_mode']!='a') { // figures a escala
+      if($image_mode!='a') { // figures a escala 
           //default value for the style - it will be overwritted with new values if we find families or any other filter
+          //$view->field['field_figure_img']->options['settings']['image_style'] = 'medium'. "_" . $view->exposed_raw_input['image_mode'];
           $view->field['field_figure_img']->options['settings']['image_style'] = 'medium'. "_" . $image_mode;
-
 
           // 1. ORDERS selected
 
@@ -912,6 +925,7 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
       }
     } // end 'auto'
     else { // no han escollit 'auto'
+      //$view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'] . "_" . $view->exposed_raw_input['image_mode'];
       $view->field['field_figure_img']->options['settings']['image_style'] = $view->exposed_raw_input['image_style'] . "_" .  $image_mode;
     }
 
