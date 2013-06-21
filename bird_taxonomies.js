@@ -1,16 +1,18 @@
 jQuery(document).ready(function($) {
 
-      $('#edit-search-block-form--2').attr('value','Enter your keyword(s)').addClass('default-keywords');
-      $('#edit-search-block-form--2').focusin(function() {
-          if ( this.value == 'Enter your keyword(s)' ) {
-            //this.removeClass('default-keywords');
-            this.value = '';
-          }
+      $('input#edit-search-block-form--2').attr('value','Enter your keyword(s)').addClass('default-keywords');
+      $('input#edit-search-block-form--2').focusin(function() {
+        if ( this.value == 'Enter your keyword(s)' ) {
+          this.value = '';
+        }
+        //console.log('addlcass');
+        $('input#edit-search-block-form--2').removeClass('default-keywords');
       }).focusout(function() {
-          if ( this.value == '' ) {
-            //this.addClass('default-keywords');
-            this.value = 'Enter your keyword(s)';
-          }
+        if ( this.value == '' ) {
+          this.value = 'Enter your keyword(s)';
+        }
+        //console.log('removeclass');
+        $('input#edit-search-block-form--2').addClass('default-keywords');
       });
 
       if($('#block-bird-taxonomies-bird-orders h2 span.plus').length == 0) {
