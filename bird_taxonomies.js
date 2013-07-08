@@ -49,7 +49,7 @@ jQuery(document).ready(function($) {
          // Miramos si ya esta puesto y sino lo obteneos
          if($(family).parent().parent().children('.container').length == 0) {
           if($('#overlay').length == 0) {
-            //$('.block-bird-taxonomies .content').prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>');
+            $('.block-bird-taxonomies .content').prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>');
           }
           jQuery.ajax({
             type: 'POST',
@@ -57,9 +57,12 @@ jQuery(document).ready(function($) {
             beforeSend: function(){
               //console.log(this);
 
-              $('#id-' + family_id).prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>');
+              //$('#id-' + family_id).prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>');
+              //console.log($('#id-' + family_id + ' > .a-wrapper'));
               var height = $('#id-' + family_id + ' > .a-wrapper').height();
-              $('#overlay').css('height', height);
+              var position = $('#id-' + family_id + ' > .a-wrapper').position();
+              //console.log(position);
+              $('#bowlG').css('top', position.top - 5);
               //console.log(height);
               $("#overlay").show();
             },
