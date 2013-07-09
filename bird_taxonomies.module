@@ -28,7 +28,7 @@ function bird_taxonomies_init () {
 }
 
 /**
-  * Implements hook_taxonomies_block_info()
+  * Implements hook_block_info()
   */
 function bird_taxonomies_block_info() {
   $blocks['bird_orders'] = array(
@@ -37,11 +37,14 @@ function bird_taxonomies_block_info() {
   $blocks['prices_table'] = array(
     'info' => t('Prices table'),
   );
+  $blocks['user_subscription'] = array(
+    'info' => t('User subscription'),
+  );
   return $blocks;
 }
 
 /**
-  * Implements hook_taxonomies_block_view()
+  * Implements hook_block_view()
   */
 function bird_taxonomies_block_view($delta = '') {
   // This example is adapted from node.module.
@@ -58,6 +61,10 @@ function bird_taxonomies_block_view($delta = '') {
     case 'prices_table':
       $block['subject'] = t('Prices Table');
       $block['content'] = theme('bird_taxonomies_prices_table');
+      break;
+    case 'user_subscription':
+      $block['subject'] = t('User Subscription');
+      $block['content'] = theme('bird_taxonomies_user_subcription');
       break;
   }
   return $block;
@@ -78,6 +85,9 @@ function bird_taxonomies_theme($existing, $type, $theme, $path) {
       'variables' => array('subspecies' => NULL, 'url_nid' => NULL,
     )),
     'bird_taxonomies_prices_table' => array(
+      'variables' => array()
+     ),
+    'bird_taxonomies_user_subcription' => array(
       'variables' => array()
      ),
   );
@@ -384,7 +394,7 @@ function theme_bird_taxonomies_bird_species($variables) {
   else {
     $items[] = array('data' => '<span class="a-wrapper clearfix">'. t('No species with this filter') . '</span>');
   }
-  
+
   $output = '';
   global $user;
   if (empty($user->roles[5]) && empty($user->roles[6]) && empty($user->roles[7]) && empty($user->roles[4]) && empty($user->roles[3])) {
@@ -499,6 +509,82 @@ function theme_bird_taxonomies_prices_table($variables) {
 <div class="free">or <a class="btn" href="/pricing">Sign up for free</a></div>';
 
   return $output;
+}
+
+function theme_bird_taxonomies_user_subcription($variables) {
+  if(is_numeric(arg(1))) {
+    $output = drupal_render(drupal_get_form('bird_taxonomies_user_subscribe'));
+  }
+
+  return $output;
+}
+
+function bird_taxonomies_user_subscribe($form, &$form_state) {
+  if(arg(0) == 'user' && is_numeric(arg(1))) {
+    $form = array (
+      //'#action' => 'eres-buena-madre/resultado', //The action attribute of the HTML form tag
+      'user'   => array(
+        '#type'  => 'hidden',
+        '#value' => arg(1),
+      ),
+      'role'   => array(
+        '#type' => 'radios',
+        '#title' => t('Subscriptions roles'),
+        '#default_value' => 5,
+        '#options' => _subscription_user_roles(),
+        '#description' => t('Subscriptions roles to assing to the user'),
+      ),
+      'submit' => array (
+        '#type' => 'submit',
+        '#value' => t('Suscribir'),
+      ),
+    );
+  }
+  else {
+    $form = array();
+  }
+
+ return $form;
+}
+
+/**
+ * Handle post_validate form submission.
+ */
+function bird_taxonomies_user_subscribe_submit(&$form, &$form_state) {
+  //dsm($form);
+  //dsm($form_state);
+
+  global $user;
+  if(in_array('administrator', array_values($user->roles))) {
+    bird_taxonomies_subscribe($form_state['values']['user'],$form_state['values']['role']);
+  }
+}
+
+function bird_taxonomies_subscribe($uid, $role) {
+  //dsm("Insertando la rule scheduler");
+  //dsm($role);
+  //dsm($uid);
+
+  if(is_numeric($uid) && is_numeric($role)) {
+    $query = db_insert('rules_scheduler') // Table name no longer needs {}
+      //->key(array('identifier' => 'commerce-subscription-remove-'.$role.'-' . $uid))
+      ->fields(array(
+        'config' => 'rules_remove_expired_subscription_role',
+        'date' => time() + 60 * 60 * 24 * 365,
+        'identifier' => 'commerce-subscription-remove-'.$role.'-' . $uid,
+      ));
+    $query->execute();
+
+    // Le añadimos el rol
+    _add_role($uid, $role);
+    drupal_set_message(t('Added a new subscription to user with uid !uid with role !role', array('!uid' => $uid, '!role' => $role)));
+  }
+
+  //dsm((string) $query);
+  //dsm($role);
+  //dsm($uid);
+
+  //
 }
 
 function get_global_filter_countries_select() {
@@ -891,7 +977,7 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
     // check if the size is set to AUTO, or not even set, then check if there are families, genus or species selected and find the best size
     if($view->exposed_raw_input['image_style']=='auto') {
       //if($view->exposed_raw_input['image_mode']!='a') { // figures a escala
-      if($image_mode!='a') { // figures a escala 
+      if($image_mode!='a') { // figures a escala
           //default value for the style - it will be overwritted with new values if we find families or any other filter
           //$view->field['field_figure_img']->options['settings']['image_style'] = 'medium'. "_" . $view->exposed_raw_input['image_mode'];
           $view->field['field_figure_img']->options['settings']['image_style'] = 'medium'. "_" . $image_mode;
@@ -1103,4 +1189,31 @@ function bird_taxonomies_get_params() {
   }
 
   return $query;
+}
+
+// From https://drupal.org/node/28379
+function _add_role($uid, $role_id) {
+  if(is_numeric($uid) && is_numeric($role_id)) {
+    $user = user_load($uid);
+    //dsm($user->roles);
+    if(!array_key_exists($role_id, $user->roles)) {
+      //dsm($role);
+      $query = db_insert('users_roles')
+        ->fields(array('uid' => $uid, 'rid' => $role_id));
+      //dsm((string) $query);
+      //dsm($uid);
+      //dsm($role->rid);
+      $query->execute();
+    }
+  }
+}
+
+function _subscription_user_roles() {
+  $roles = array(5 => 'Basic subscriptor',
+                 6 => 'Supporting subscriptor',
+                 7 => 'Institutional',
+                 8 => 'Free subscriptor',
+                 );
+
+  return $roles;
 }
