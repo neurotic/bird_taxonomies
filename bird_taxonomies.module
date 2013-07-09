@@ -204,7 +204,7 @@ function bird_taxonomies_get_species_ajax_callback($family = NULL,$url_nid = 0) 
   global $user;
   // No mostramos más alla de las familias cuando el usuario no tiene uno de estos roles: Basic, Supporting, Institutional, Editor, Administrator
   if (empty($user->roles[5]) && empty($user->roles[6]) && empty($user->roles[7]) && empty($user->roles[4]) && empty($user->roles[3])) {
-    print '<div class="avis">Only members are allowed to browse further</div>';
+    print '<div class="avis">Only subscribed members are allowed to browse further</div>';
   }
   else {
     $species = bird_taxonomies_get_species($family);
@@ -388,7 +388,7 @@ function theme_bird_taxonomies_bird_species($variables) {
   $output = '';
   global $user;
   if (empty($user->roles[5]) && empty($user->roles[6]) && empty($user->roles[7]) && empty($user->roles[4]) && empty($user->roles[3])) {
-    $output .= '<div class="avis">Only members are allowed to browse further</div>';
+    $output .= '<div class="avis">Only subscribed members are allowed to browse further</div>';
   }
   else {
     $output .= theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'species clearfix')));
@@ -423,6 +423,28 @@ function theme_bird_taxonomies_bird_subspecies($variables) {
 }
 
 function theme_bird_taxonomies_prices_table($variables) {
+  
+    $line_item = commerce_line_item_new('product', $order_id = 0);
+    $line_item->data['context']['product_ids'] = array(1);
+    $line_item->quantity = 1;
+    $form_id = commerce_cart_add_to_cart_form_id(array(1), 1);
+    $addtocart_form = drupal_get_form($form_id, $line_item);
+    $basic_button = render($addtocart_form);
+  
+    $line_item = commerce_line_item_new('product', $order_id = 0);
+    $line_item->data['context']['product_ids'] = array(2);
+    $line_item->quantity = 1;
+    $form_id = commerce_cart_add_to_cart_form_id(array(2), 1);
+    $addtocart_form = drupal_get_form($form_id, $line_item);
+    $supporting_button = render($addtocart_form);
+    
+    $line_item = commerce_line_item_new('product', $order_id = 0);
+    $line_item->data['context']['product_ids'] = array(3);
+    $line_item->quantity = 1;
+    $form_id = commerce_cart_add_to_cart_form_id(array(3), 1);
+    $addtocart_form = drupal_get_form($form_id, $line_item);
+    $institutional_button = render($addtocart_form);
+  
   $output = '<table id="plan-comparison">
   <thead>
     <tr class="row1 odd">
@@ -455,7 +477,7 @@ function theme_bird_taxonomies_prices_table($variables) {
       <td class="col1"><div>Newsletters</div></td>
       <td class="col2"><div class="true"><span>true</span></div></td>
       <td class="col3"><div class="true"><span>true</span></div></td>
-      <td class="col4"><div class="false"><span>false</span></div></td>
+      <td class="col4"><div class="true"><span>true</span></div></td>
     </tr>
     <tr class="row6 even">
       <td class="col1"><div>Get access to all the contents</div></td>
@@ -490,13 +512,12 @@ function theme_bird_taxonomies_prices_table($variables) {
     </tr>
     <tr class="row-last odd">
       <td class="col1"><div>&nbsp;</div></td>
-      <td class="col2"><div><a href="#">sign up</a></div></td>
-      <td class="col3"><div><a href="#">sign up</a></div></td>
-      <td class="col4"><div><a href="#">sign up</a></div></td>
+      <td class="col2"><div>'.$basic_button .'</div></td>
+      <td class="col3"><div>'.$supporting_button.'</div></td>
+      <td class="col4"><div>'.$institutional_button.'</div></td>
     </tr>
   </tbody>
-</table>
-<div class="free">or <a class="btn" href="/pricing">Sign up for free</a></div>';
+</table>';
 
   return $output;
 }
@@ -522,7 +543,7 @@ function get_global_filter_countries_select() {
     return $country_filter;
 }
 
-function get_global_filter_countries_select2() {
+/*function get_global_filter_countries_select2() {
     $country_filter2 = '';
 
     if(!empty($_SESSION['hbw_action']['checklist_nid'])) {
@@ -533,14 +554,14 @@ function get_global_filter_countries_select2() {
     }
     else {
       $country_filter2 = false;
-      // Definir la variable de session quan l'usuari arriba al node Checklist sense haber editat el node abans:
-      /*if (isset($node) && $node->type == 'locality') { // node form o node display
-        $_SESSION['hbw_action']['checklist_nid'] = $node->field_myr_country['und'][0]['target_id']; // ja definida linia 155 de node--locality.tpl.php, pero es crea quan es visita el full node...massa tard per filtrar la view set-record
-      }*/
+      // Definir la variable de session quan l'usuari arriba al node Birdlist sense haber editat el node abans:
+      //if (isset($node) && $node->type == 'locality') { // node form o node display
+        //$_SESSION['hbw_action']['checklist_nid'] = $node->field_myr_country['und'][0]['target_id']; // ja definida linia 155 de node--locality.tpl.php, pero es crea quan es visita el full node...massa tard per filtrar la view set-record
+      //}
     }
 
     return $country_filter2;
-}
+}*/
 
 function get_global_filter_countries() {
     $country_filter = '';
@@ -587,7 +608,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
   // If the input for the title filter is a positive integer, filter against
   // node ID instead of node title.
 
-  // View incrustada en un node Checklist. Mostrar les sp del pais seleccionat + excluir les sp ja marcades en el node checklist
+  // View incrustada en un node Birdlist. Mostrar les sp del pais seleccionat + excluir les sp ja marcades en el node birdlist
 /*  if ($view->name == 'set_records') {
     $country_filter2 = get_global_filter_countries_select2();
     if(!empty($country_filter2)) {
@@ -599,7 +620,7 @@ function bird_taxonomies_views_query_alter(&$view, &$query) {
           $nids[] = $record->nid_hbw;
       }
 
-      // recuperar les sp ja afegides al checklist
+      // recuperar les sp ja afegides al birdlist
       $nids_checklist = 'SELECT field_data_field_myr_sp.field_myr_sp_target_id
 FROM field_data_field_myr_sp, field_data_field_loc_sp
 WHERE field_data_field_myr_sp.entity_id = field_data_field_loc_sp.field_loc_sp_target_id
@@ -640,8 +661,8 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
     }
   }*/
 
-  // no ho fem amb un global filter 2, sino agafant en la url el arg del country del node Checklist que s'està veient. Si no funciona, agafar el nid del checklist de la url, i fer la consulta a la bbdd de quin pais es.
-  if ($view->name == 'set_records') {
+  // no ho fem amb un global filter 2, sino agafant en la url el arg del country del node Birdlist que s'està veient. Si no funciona, agafar el nid del birdlist de la url, i fer la consulta a la bbdd de quin pais es.
+  /*if ($view->name == 'set_records') {
     //print get_global_filter_countries_select(); ==> SELECT distinct(bd.nid_hbw) FROM bird_countries as bd WHERE bd.tid_hbw IN (4263, 4269, 4449, 4475, 4479, 4498, 4509, 4514, 4517, 4518, 4519, 4521, 4523, 4526, 4527, 4528, 4534, 4537, 4538, 4541, 4542, 4543, 4545, 4546, 4547, 4549, 4551, 4554)
     //$country_filter2 = $_GET['field_myr_country'];
     $arg_record_1 = arg(1);
@@ -669,12 +690,12 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
                    'args' => array(),
                  );
     }
-  }
+  }*/ // TAMPOC ES FA JA AMB AIXO, SINO AGAFANT EL PAIS DEL BIRDLIST CORRESPONENT AL MY-RECORD des de node--locality.tpl.php
 
   // Aqui Filtramos:
   //  - la tabla de las sp en los nodes Family
   //  - la view que determina el orden de las sp en la slidebox
-  //  - la view per atribuir uns records a un checklist
+  //  - la view per atribuir uns records a un birdlist
 
   // Modificacions en la llista de països del bloc Global Filter 1
   // De moment excluem els estats de EEUU i Canada. Mexic pendent
@@ -723,7 +744,7 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
     }
   } // species_table_by_family
 
-  if ($view->name == 'family_index') {
+  /*if ($view->name == 'family_index') {
 
     $country_filter = get_global_filter_countries_select();
     //dsm($country_filter);
@@ -746,7 +767,7 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
                    'args' => array(),
                  );
     }
-  } // family_index
+  }*/ // family_index
 
   // filtrem les views de species list a la pag de familia + la pagina my-list
   if ( ($view->name == 'taxo_tree3') || ($view->name == 'my_list') ){
@@ -775,10 +796,10 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
     } // if - no hay else, si no tenemos paises activados en el filtro, no se filtra.
   }  // taxo-tree3 & my_list
 
-  // filter the taxonomy/term page for country checklists. The views shows all species, here we limit them using bird_countries.
+  // filter the taxonomy/term page for country birdlists. The views shows all species, here we limit them using bird_countries.
   if ($view->name == 'country_term_page') {
-    //drupal_set_message('arg0: ' . arg(0) . ' arg1: ' . arg(1) . ' arg2: ' . arg(2) . '<br />$view->args[0]: ' . $view->args['0'], $repeat = FALSE);
-    if(is_numeric($view->args['0'])) {
+    //drupal_set_message('arg0: ' . arg(0) . ' arg1: ' . arg(1) . ' arg2: ' . arg(2) . '<br />$view->args[0]: ' . $view->args['0'] . '<br />$view->args[1]: ' . $view->args['1'], $repeat = FALSE);
+    if(!empty($view->args['0']) && is_numeric($view->args['0'])) {
       // filtrar per Status (endemic,...)
       if(!empty($_GET['country_status'])) {
         switch($_GET['country_status']) {
