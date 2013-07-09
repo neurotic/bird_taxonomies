@@ -49,7 +49,7 @@ jQuery(document).ready(function($) {
          // Miramos si ya esta puesto y sino lo obteneos
          if($(family).parent().parent().children('.container').length == 0) {
           if($('#overlay').length == 0) {
-            $('.block-bird-taxonomies .content').prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>');
+            $('.block-bird-taxonomies .content').prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>'); 
           }
           jQuery.ajax({
             type: 'POST',
@@ -58,11 +58,11 @@ jQuery(document).ready(function($) {
               //console.log(this);
 
               //$('#id-' + family_id).prepend('<div id="overlay"><div id="bowlG"><div id="bowl_ringG"><div class="ball_holderG"><div class="ballG"></div></div></div></div></div>');
-              //console.log($('#id-' + family_id + ' > .a-wrapper'));
+              //console.log($('#id-' + family_id + ' > .a-wrapper')); 
               var height = $('#id-' + family_id + ' > .a-wrapper').height();
               var position = $('#id-' + family_id + ' > .a-wrapper').position();
               //console.log(position);
-              $('#bowlG').css('top', position.top - 5);
+              $('#bowlG').css('top', position.top - 5); 
               //console.log(height);
               $("#overlay").show();
             },
@@ -174,7 +174,19 @@ jQuery(document).ready(function($) {
             return false;
         }
       }
-
+      
+      /**
+       * Equalize sidebar first and content height
+       */
+      //var highestCol = Math.max($('#region-sidebar-first').height(),$('#region-content').height());
+      var highestCol = $('#region-sidebar-first .region-sidebar-first-inner').height();
+      //console.log(highestCol);
+      if ( ($('#region-content .region-content-inner .content-inner').height()) < ($('#region-sidebar-first .region-sidebar-first-inner').height()) ) {
+        $('#region-content .region-content-inner').height(highestCol - 5);
+      }
+      // idem pels 2 blocs centrals de la portada
+      var highestCol2 = Math.max($('#region-content .view-frontpage-content-blocks .views-row-1 .inner').height(),$('#region-content .view-frontpage-content-blocks .views-row-2 .inner').height());
+      $('#region-content .view-frontpage-content-blocks .views-row .inner').height(highestCol2);
 });
 
 /**
@@ -185,13 +197,14 @@ jQuery(document).ready(function($) {
     // Estat del tree al carregar-se: expanded
     $('#region-sidebar-first section#block-menu-menu-geographical-tree li.first.last.dhtml-menu > ul.menu').css('display', 'block');
     // Esborrar el "R" de "R World" del Geographical tree
-    $('#dhtml_menu-11337 > a').text('World')
-    //$('#region-sidebar-first section#block-menu-menu-geographical-tree ul.menu > li.first > ul.menu > li.first > a').text('World')
+    //$('li#dhtml_menu-11337').text('World');
+    //$('section#block-menu-menu-geographical-tree .content > ul.menu > li.first.last > a').text('World');
     // expandre la zona clickable del icona a tot el nom
-    $('#dhtml_menu-11337 > a, #dhtml_menu-10983 > a, #dhtml_menu-11038 > a, #dhtml_menu-11048 > a, #dhtml_menu-11077 > a, #dhtml_menu-11148 > a, #dhtml_menu-11195 > a, #dhtml_menu-11223 > a').unbind('click').bind('click', function() {
+    $('li#dhtml_menu-11337 > a, li#dhtml_menu-10983 > a, li#dhtml_menu-11038 > a, li#dhtml_menu-11048 > a, li#dhtml_menu-11077 > a, li#dhtml_menu-11148 > a, li#dhtml_menu-11195 > a, li#dhtml_menu-11223 > a').unbind('click').bind('click', function() {
+    //$('section#block-menu-menu-geographical-tree .content > ul.menu > li.first.last > ul.menu > li > a').unbind('click').bind('click', function() {
       $('a.dhtml-menu-icon', this).click();
     });
     // Prevent (the real) click (to taxonomy entity) on parent items (World, Afrotropical,...)
-    $('#dhtml_menu-11337 > a, #dhtml_menu-10983 > a, #dhtml_menu-11038 > a, #dhtml_menu-11048 > a, #dhtml_menu-11077 > a, #dhtml_menu-11148 > a, #dhtml_menu-11195 > a, #dhtml_menu-11223 > a').click(false);
+    $('li#dhtml_menu-11337 > a, li#dhtml_menu-10983 > a, li#dhtml_menu-11038 > a, li#dhtml_menu-11048 > a, li#dhtml_menu-11077 > a, li#dhtml_menu-11148 > a, li#dhtml_menu-11195 > a, li#dhtml_menu-11223 > a').click(false);
   });
 })(jQuery);
