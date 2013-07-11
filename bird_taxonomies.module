@@ -433,28 +433,28 @@ function theme_bird_taxonomies_bird_subspecies($variables) {
 }
 
 function theme_bird_taxonomies_prices_table($variables) {
-  
+
     $line_item = commerce_line_item_new('product', $order_id = 0);
     $line_item->data['context']['product_ids'] = array(1);
     $line_item->quantity = 1;
     $form_id = commerce_cart_add_to_cart_form_id(array(1), 1);
     $addtocart_form = drupal_get_form($form_id, $line_item);
     $basic_button = render($addtocart_form);
-  
+
     $line_item = commerce_line_item_new('product', $order_id = 0);
     $line_item->data['context']['product_ids'] = array(2);
     $line_item->quantity = 1;
     $form_id = commerce_cart_add_to_cart_form_id(array(2), 1);
     $addtocart_form = drupal_get_form($form_id, $line_item);
     $supporting_button = render($addtocart_form);
-    
+
     $line_item = commerce_line_item_new('product', $order_id = 0);
     $line_item->data['context']['product_ids'] = array(3);
     $line_item->quantity = 1;
     $form_id = commerce_cart_add_to_cart_form_id(array(3), 1);
     $addtocart_form = drupal_get_form($form_id, $line_item);
     $institutional_button = render($addtocart_form);
-  
+
   $output = '<table id="plan-comparison">
   <thead>
     <tr class="row1 odd">
@@ -533,8 +533,15 @@ function theme_bird_taxonomies_prices_table($variables) {
 }
 
 function theme_bird_taxonomies_user_subcription($variables) {
-  if(is_numeric(arg(1))) {
-    $output = drupal_render(drupal_get_form('bird_taxonomies_user_subscribe'));
+  $output = '';
+
+  if(arg(0) == 'user' && is_numeric(arg(1))) {
+    $user = user_load(arg(1));
+    $subscription_roles = array('Basic subscriptor', 'Supporting subscriptor', 'Institutional');
+    // Miramos si el usuario no tiene algunos de los roles de suscripción
+    if(count(array_intersect($subscription_roles, $user->roles)) == 0) {
+      $output = drupal_render(drupal_get_form('bird_taxonomies_user_subscribe'));
+    }
   }
 
   return $output;
@@ -547,6 +554,13 @@ function bird_taxonomies_user_subscribe($form, &$form_state) {
       'user'   => array(
         '#type'  => 'hidden',
         '#value' => arg(1),
+      ),
+      'time'   => array(
+        '#type' => 'select',
+        '#title' => t('Subscriptions months'),
+        '#default_value' => 3,
+        '#options' => _subscription_time(),
+        '#description' => t('Subscriptions months to assing to the user'),
       ),
       'role'   => array(
         '#type' => 'radios',
@@ -577,35 +591,38 @@ function bird_taxonomies_user_subscribe_submit(&$form, &$form_state) {
 
   global $user;
   if(in_array('administrator', array_values($user->roles))) {
-    bird_taxonomies_subscribe($form_state['values']['user'],$form_state['values']['role']);
+    bird_taxonomies_subscribe($form_state['values']['user'],$form_state['values']['role'], $form_state['values']['time']);
   }
 }
 
-function bird_taxonomies_subscribe($uid, $role) {
+function bird_taxonomies_subscribe($uid, $role, $time) {
   //dsm("Insertando la rule scheduler");
   //dsm($role);
   //dsm($uid);
 
-  if(is_numeric($uid) && is_numeric($role)) {
+  if(is_numeric($uid) && is_numeric($role) && is_numeric($time)) {
     $query = db_insert('rules_scheduler') // Table name no longer needs {}
       //->key(array('identifier' => 'commerce-subscription-remove-'.$role.'-' . $uid))
       ->fields(array(
         'config' => 'rules_remove_expired_subscription_role',
-        'date' => time() + 60 * 60 * 24 * 365,
+        'date' => time() + 60 * 60 * 24 * 31 * $time,
         'identifier' => 'commerce-subscription-remove-'.$role.'-' . $uid,
       ));
     $query->execute();
 
     // Le añadimos el rol
     _add_role($uid, $role);
+    // Le quitamos el Free
+    _remove_role($uid,8);
     drupal_set_message(t('Added a new subscription to user with uid !uid with role !role', array('!uid' => $uid, '!role' => $role)));
   }
+}
 
-  //dsm((string) $query);
-  //dsm($role);
-  //dsm($uid);
-
-  //
+/*
+ Comprueba si un usuario tiene algún rol de suscriptor
+ */
+function _is_subscriptor($user) {
+  dsm($user);
 }
 
 function get_global_filter_countries_select() {
@@ -1229,12 +1246,35 @@ function _add_role($uid, $role_id) {
   }
 }
 
+// From https://drupal.org/node/28379
+function _remove_role($uid, $role_id) {
+  if(is_numeric($uid) && is_numeric($role_id)) {
+    $user = user_load($uid);
+    //dsm($user->roles);
+    if(array_key_exists($role_id, $user->roles)) {
+      //dsm($role);
+      $query = db_delete('users_roles')
+        ->condition('uid', $uid)
+        ->condition('rid', $role_id);
+      //dsm((string) $query);
+      //dsm($uid);
+      //dsm($role->rid);
+      $query->execute();
+    }
+  }
+}
+
 function _subscription_user_roles() {
   $roles = array(5 => 'Basic subscriptor',
                  6 => 'Supporting subscriptor',
                  7 => 'Institutional',
-                 8 => 'Free subscriptor',
                  );
 
   return $roles;
+}
+
+function _subscription_time() {
+  $months = range(1, 24);
+
+  return $months;
 }
