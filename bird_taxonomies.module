@@ -210,7 +210,6 @@ ORDER BY field_data_field_fam_ordenacio.field_fam_ordenacio_value ASC");
 }
 
 function bird_taxonomies_get_species_ajax_callback($family = NULL,$url_nid = 0) {
-
   global $user;
   // No mostramos más alla de las familias cuando el usuario no tiene uno de estos roles: Basic, Supporting, Institutional, Editor, Administrator
   if (empty($user->roles[5]) && empty($user->roles[6]) && empty($user->roles[7]) && empty($user->roles[4]) && empty($user->roles[3])) {
@@ -224,6 +223,8 @@ function bird_taxonomies_get_species_ajax_callback($family = NULL,$url_nid = 0) 
 }
 
 function bird_taxonomies_get_species($family = NULL) {
+  //dsm("Ejecutando bird_taxonomies_get_species");
+
     //creo index a la BD: ALTER TABLE `hbw`.`bird_countries` ADD INDEX `tid_hbw`(`tid_hbw`);
     $query = "SELECT distinct(node.title) AS node_title, node.nid AS nid, field_data_field_sp_ordre2.field_sp_ordre2_value AS field_data_field_sp_ordre2, field_data_field_sp_monotypic.field_sp_monotypic_value AS sp_monotypic
 FROM
@@ -601,6 +602,9 @@ function bird_taxonomies_subscribe($uid, $role, $time) {
   //dsm($uid);
 
   if(is_numeric($uid) && is_numeric($role) && is_numeric($time)) {
+
+    /*
+    Esto hay que hacer así: https://drupal.org/node/1967786
     $query = db_insert('rules_scheduler') // Table name no longer needs {}
       //->key(array('identifier' => 'commerce-subscription-remove-'.$role.'-' . $uid))
       ->fields(array(
@@ -609,6 +613,17 @@ function bird_taxonomies_subscribe($uid, $role, $time) {
         'identifier' => 'commerce-subscription-remove-'.$role.'-' . $uid,
       ));
     $query->execute();
+    */
+   $state = new RulesState(); // This is used to pass info into the Component. In this example no data is passed in, so the action of the component is fixed - for instance it might be sending an email to a particular email address.
+
+   $task = array(
+    'identifier' => 'commerce-subscription-remove-'.$role.'-' . $uid,
+    'date'         => time() + 60 * 60 * 24 * 31 * $time,
+    'config'      => 'rules_remove_expired_subscription_role',
+    'state'        => $state,
+    );
+
+    rules_scheduler_schedule_task($task);
 
     // Le añadimos el rol
     _add_role($uid, $role);
@@ -616,13 +631,6 @@ function bird_taxonomies_subscribe($uid, $role, $time) {
     _remove_role($uid,8);
     drupal_set_message(t('Added a new subscription to user with uid !uid with role !role', array('!uid' => $uid, '!role' => $role)));
   }
-}
-
-/*
- Comprueba si un usuario tiene algún rol de suscriptor
- */
-function _is_subscriptor($user) {
-  dsm($user);
 }
 
 function get_global_filter_countries_select() {
@@ -1215,6 +1223,7 @@ function bird_taxonomies_views_api() {
   return $array;
 }
 
+/*
 function bird_taxonomies_get_params() {
   global $base_url;
   $query = array();
@@ -1227,7 +1236,7 @@ function bird_taxonomies_get_params() {
   }
 
   return $query;
-}
+}*/
 
 // From https://drupal.org/node/28379
 function _add_role($uid, $role_id) {
