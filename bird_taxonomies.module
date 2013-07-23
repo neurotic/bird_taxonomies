@@ -615,10 +615,13 @@ function bird_taxonomies_subscribe($uid, $role, $time) {
     $query->execute();
     */
    $state = new RulesState(); // This is used to pass info into the Component. In this example no data is passed in, so the action of the component is fixed - for instance it might be sending an email to a particular email address.
+   $state->addVariable('role_id', $role, array());
+   $state->addVariable('user', $uid, array());
 
    $task = array(
     'identifier' => 'commerce-subscription-remove-'.$role.'-' . $uid,
     'date'         => time() + 60 * 60 * 24 * 31 * $time,
+    //'date'         => time() + 10,
     'config'      => 'rules_remove_expired_subscription_role',
     'state'        => $state,
     );
