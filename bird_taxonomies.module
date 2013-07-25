@@ -369,7 +369,7 @@ function theme_bird_taxonomies_bird_species($variables) {
 
     $node_actual_specie = $url_nid;
       // Si es una especie entonces tenemos que buscar a su padre
-    if($node->type == 'subspecies') {
+    if(isset($node->type) && $node->type == 'subspecies') {
       $node_actual_specie = $node->field_ssp_species['und'][0]['nid'];
     }
   }
