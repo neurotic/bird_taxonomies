@@ -1,5 +1,12 @@
 <?php
 
+// Profiling module integration.
+if (!function_exists('profiling_start')) {
+  function profiling_start() { }
+  function profiling_stop() { }
+}
+
+
 /**
   * Implements hook_menu()
   */
@@ -33,6 +40,7 @@ function bird_taxonomies_init () {
 function bird_taxonomies_block_info() {
   $blocks['bird_orders'] = array(
     'info' => t('Bird Orders'),
+    //'cache' => DRUPAL_CACHE_PER_PAGE,
   );
   $blocks['prices_table'] = array(
     'info' => t('Prices table'),
@@ -94,6 +102,7 @@ function bird_taxonomies_theme($existing, $type, $theme, $path) {
 }
 
 function bird_taxonomies_bird_orders() {
+  profiling_start('bird_taxonomies_bird_orders', 'bird_taxonomies');
 
   $result = db_query("SELECT node.title AS node_title, node.nid AS nid
                       FROM
@@ -146,10 +155,14 @@ function bird_taxonomies_bird_orders() {
     }
   }
 
+  profiling_stop('bird_taxonomies_bird_orders','bird_taxonomies');
+
   return $orders;
 }
 
 function bird_taxonomies_get_families($node_actual = 0 ) {
+  profiling_start('bird_taxonomies_bird_families','bird_taxonomies');
+
 
   $result = db_query("SELECT node.title AS node_title, node.nid AS nid, node_field_data_field_fam_order.nid AS node_field_data_field_fam_order_nid, node.created AS node_created, 'node' AS field_data_field_fam_order_ibc_node_entity_type
 FROM
@@ -206,6 +219,8 @@ ORDER BY field_data_field_fam_ordenacio.field_fam_ordenacio_value ASC");
     }
   }
 
+  profiling_stop('bird_taxonomies_bird_families','bird_taxonomies');
+
   return $families;
 }
 
@@ -223,6 +238,8 @@ function bird_taxonomies_get_species_ajax_callback($family = NULL,$url_nid = 0) 
 }
 
 function bird_taxonomies_get_species($family = NULL) {
+  profiling_start('bird_taxonomies_bird_species','bird_taxonomies');
+
   //dsm("Ejecutando bird_taxonomies_get_species");
 
     //creo index a la BD: ALTER TABLE `hbw`.`bird_countries` ADD INDEX `tid_hbw`(`tid_hbw`);
@@ -262,10 +279,15 @@ LEFT JOIN {field_data_field_sp_ordre2} field_data_field_sp_ordre2 ON node.nid = 
       $species[] = $record;
   }
 
+  profiling_stop('bird_taxonomies_bird_species','bird_taxonomies');
+
   return $species;
 }
 
 function bird_taxonomies_get_subspecies($specie = NULL) {
+
+  profiling_start('bird_taxonomies_bird_subspecies','bird_taxonomies');
+
 
   $result = db_query("SELECT node.title AS node_title, node.nid AS nid, node.created AS node_created
 FROM
@@ -283,12 +305,18 @@ ORDER BY node_title DESC",array(':specie' => $specie));
       */
     $subspecies[] = $record;
   }
+
+  profiling_stop('bird_taxonomies_bird_subspecies','bird_taxonomies');
+
   if (!empty($subspecies)) {
     return $subspecies;
   }
 }
 
 function bird_taxonomies_get_species_family_group() {
+
+  profiling_start('bird_taxonomies_bird_species_family_group','bird_taxonomies');
+
 
     $query = "SELECT node.title AS node_title, node.nid AS nid, field_data_field_sp_family_nr.field_sp_family_nr_nid AS family_nid
 FROM {node} node
@@ -316,10 +344,15 @@ LEFT JOIN {node} node_field_data_field_sp_family_nr ON field_data_field_sp_famil
     $species[$record->family_nid][$record->nid] = $record;
   }
 
+  profiling_stop('bird_taxonomies_bird_species_family_group','bird_taxonomies');
+
   return $species;
 }
 
 function bird_taxonomies_get_subspecies_ajax_callback($specie = NULL, $url_nid = 0) {
+
+  profiling_start('bird_taxonomies_bird_subspecies_ajax','bird_taxonomies');
+
 
   $subspecies = bird_taxonomies_get_subspecies($specie);
 
@@ -327,15 +360,16 @@ function bird_taxonomies_get_subspecies_ajax_callback($specie = NULL, $url_nid =
   //print($subspecies);
 
   print theme('bird_taxonomies_bird_subspecies',array('subspecies' => $subspecies, 'url_nid' => $url_nid));
+
+  profiling_stop('bird_taxonomies_bird_subspecies_ajax','bird_taxonomies');
+
   exit();
 }
 
-/** Abre o cierra el menu segun donde estemos **/
-function bird_taxonomies_menu_state() {
-
-}
-
 function theme_bird_taxonomies_bird_orders($variables) {
+
+  profiling_start('theme_bird_taxonomies_bird_orders','bird_taxonomies');
+
   $orders = $variables['orders'];
 
   $output = '';
@@ -352,10 +386,15 @@ $output .= '';
 
   $output .= theme('item_list', array('items' => $orders, 'attributes' => array ('class' => 'orders clearfix')));
 
+  profiling_stop('theme_bird_taxonomies_bird_orders','bird_taxonomies');
+
   return $output;
 }
 
 function theme_bird_taxonomies_bird_species($variables) {
+
+  profiling_start('theme_bird_taxonomies_bird_species','bird_taxonomies');
+
   $species = $variables['species'];
   $url_nid = $variables['url_nid'];
 
@@ -405,10 +444,15 @@ function theme_bird_taxonomies_bird_species($variables) {
     $output .= theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'species clearfix')));
   }
 
+  profiling_stop('theme_bird_taxonomies_bird_species','bird_taxonomies');
+
   return $output;
 }
 
 function theme_bird_taxonomies_bird_subspecies($variables) {
+
+  profiling_start('theme_bird_taxonomies_bird_subspecies','bird_taxonomies');
+
   $subspecies = $variables['subspecies'];
   $url_nid = $variables['url_nid'];
 
@@ -430,10 +474,14 @@ function theme_bird_taxonomies_bird_subspecies($variables) {
     $output = theme('item_list', array('items' => $items, 'attributes' => array ('class' => 'subspecies clearfix')));
   }
 
+  profiling_stop('theme_bird_taxonomies_bird_subspecies','bird_taxonomies');
+
   return $output;
 }
 
 function theme_bird_taxonomies_prices_table($variables) {
+
+  profiling_start('theme_bird_taxonomies_prices_table','bird_taxonomies');
 
     $line_item = commerce_line_item_new('product', $order_id = 0);
     $line_item->data['context']['product_ids'] = array(1);
@@ -529,6 +577,8 @@ function theme_bird_taxonomies_prices_table($variables) {
     </tr>
   </tbody>
 </table>';
+
+  profiling_stop('theme_bird_taxonomies_prices_table','bird_taxonomies');
 
   return $output;
 }
@@ -639,6 +689,9 @@ function bird_taxonomies_subscribe($uid, $role, $time) {
 }
 
 function get_global_filter_countries_select() {
+
+    profiling_start('get_global_filter_countries_select','bird_taxonomies');
+
     $countries = array();
     $country_filter = '';
 
@@ -655,6 +708,8 @@ function get_global_filter_countries_select() {
     else {
       $country_filter = false;
     }
+
+    profiling_stop('get_global_filter_countries_select','bird_taxonomies');
 
     return $country_filter;
 }
@@ -680,6 +735,9 @@ function get_global_filter_countries_select() {
 }*/
 
 function get_global_filter_countries() {
+
+    profiling_start('get_global_filter_countries','bird_taxonomies');
+
     $country_filter = '';
 
     if(!empty($_SESSION['global_filter']['view_taxo_paisos'])) {
@@ -716,10 +774,15 @@ function get_global_filter_countries() {
       $country_filter = false;
     }
 
+    profiling_stop('get_global_filter_countries','bird_taxonomies');
+
     return $country_filter;
 }
 
 function bird_taxonomies_views_query_alter(&$view, &$query) {
+
+    profiling_start('bird_taxonomies_views_query_alter','bird_taxonomies');
+
   // (Example assuming a view with an exposed filter on node title)
   // If the input for the title filter is a positive integer, filter against
   // node ID instead of node title.
@@ -1091,19 +1154,30 @@ AND field_data_field_loc_sp.entity_id ='.$_SESSION['hbw_action']['checklist_nid'
 
   }  // galley_fluid - plates filtradas!
 
+  profiling_stop('bird_taxonomies_views_query_alter','bird_taxonomies');
+
 } // views_query_alter
 
 
 function bird_taxonomies_views_post_render(&$view, &$output, &$cache) {
+
+  profiling_start('bird_taxonomies_views_post_render','bird_taxonomies');
+
   // replace the original image url for the colorbox style.
   if ($view->name == 'galley_fluid') {
     $output = str_replace('/files/figures/','/files/styles/colorbox-plate/public/figures/',$output);
   }
+
+  profiling_stop('bird_taxonomies_views_post_render','bird_taxonomies');
+
 }
 
 
 // este hook para que se usa???
 function bird_taxonomies_form_global_filter_1_alter(&$form, &$form_state, $form_id) {
+
+  profiling_start('bird_taxonomies_form_global_filter_1_alter','bird_taxonomies');
+
   $tabla_continents = bird_taxonomies_continents();
 
   $continentes = array();
@@ -1122,6 +1196,8 @@ function bird_taxonomies_form_global_filter_1_alter(&$form, &$form_state, $form_
 
   //array_unshift(, $form['view_taxo_paisos']['#options']);
 
+  profiling_stop('bird_taxonomies_form_global_filter_1_alter','bird_taxonomies');
+
 }
 
 // creo que esta funcion no se utiliza nunca y se puede eliminar!!!! no???? - Ferran.
@@ -1131,22 +1207,34 @@ function bird_taxonomies_form_global_filter_1_alter(&$form, &$form_state, $form_
 
 // Funcion que devuelve un array con los tids que cuelgan de el continente o region que se le pasa.
 function bird_taxonomies_get_tids_from_region($region){
+
+  profiling_start('bird_taxonomies_get_tids_from_region','bird_taxonomies');
+
     $tids=array();
     $result = db_query("SELECT distinct(tid) FROM {taxonomy_term_hierarchy} h where h.parent=:tid_region",array(':tid_region' => $region));
     foreach ($result as $record) {
         $tids[] = $record->tid;
     }
+
+  profiling_stop('bird_taxonomies_get_tids_from_region','bird_taxonomies');
+
     return $tids;
 }
 
 // el resultado de esta funcion no cambia casi nunca (cuando se pongan paises nuevos en europa, etc...) asi que hay que cachear el resultado y no calcularlo siempre!!
 function bird_taxonomies_continents() {
 
+  profiling_start('bird_taxonomies_continents','bird_taxonomies');
+
+  $tabla_continents = &drupal_static(__FUNCTION__);
+  if (!isset($tabla_continents)) {
+    //dsm("No existe como variable estática");
     if ($cache = cache_get('bird_tax_cont')) {
-        return $cache->data;
+        //dsm("Recuperamos de la cache");
+        $tabla_continents = $cache->data;
     }
     else {
-
+        //dsm("La recuperamos de la base de datos");
         $tabla_continents=array();
 
         // NOW: all regions and continents that are root, que tienen como parent = 0, y de las que hay que sacar los paises
@@ -1156,11 +1244,21 @@ function bird_taxonomies_continents() {
             $una_region = array('name' => $record->tid,
                                 'countries' => bird_taxonomies_get_tids_from_region($record->tid));
             $tabla_continents[] = $una_region;
+            //dsm("Hacemos una query");
         }
 
         cache_set('bird_tax_cont', $tabla_continents, 'cache',time()+3600);
-        return $tabla_continents;
     }
+  }
+  else {
+    //dsm("Sí existe como variable estática");
+  }
+
+  profiling_stop('bird_taxonomies_continents','bird_taxonomies');
+
+  //dsm($tabla_continents);
+
+  return $tabla_continents;
 }
 
 /* // Este hook tenia todo el codigo comentado... eliminamos toda la funcion? - ferran.
@@ -1290,4 +1388,51 @@ function _subscription_time() {
   $months = range(1, 24);
 
   return $months;
+}
+
+/**
+ * @file
+ * Profiling Views module.
+ */
+
+/**
+ * Implementation of hook_profiling_timer_help().
+ */
+function bird_taxonomies_profiling_timer_help() {
+  $items = array();
+  // Since the main goal of these modules is to be the almost invisible, I'd
+  // rather not make it depending on Views, and remain silent if wrongly
+  // enabled.
+  // This will avoid some bad WSOD, and make it not enabling the Views module
+  // if enabled per error by the site admin.
+  /*if (function_exists('views_get_all_views')) {
+    foreach (views_get_all_views() as $view) {
+      foreach ($view->display as $display_id => $display) {
+        $items['view_' . $view->name . '-' . $display_id] = array(
+          'title' => t("View @name (@display)", array('@name' => $view->name, '@display' => $display->display_title)),
+          'description' => t("View statistics."),
+        );
+      }
+    }
+  }*/
+  return $items;
+}
+
+/**
+ * Implementation of hook_profiling_analyze().
+ */
+function bird_taxonomies_profiling_analyze($name, $row, $thresholds) {
+  // FIXME: TODO
+}
+
+/**
+ * Implementation of hook_profiling_collection_help().
+ */
+function bird_taxonomies_profiling_collection_help() {
+  $items = array();
+  $items['bird_taxonomies'] = array(
+    'title' => t("bird_taxonomies"),
+    'description' => t("bird_taxonomies build, execute and render time."),
+  );
+  return $items;
 }
